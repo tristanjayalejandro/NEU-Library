@@ -29,7 +29,6 @@
         </button>
       </div>
 
-      <!-- Search -->
       <div class="filter-bar">
         <div class="search-wrap">
           <span class="search-icon">
@@ -42,7 +41,6 @@
         </div>
       </div>
 
-      <!-- Table -->
       <div class="card table-wrap">
         <table>
           <thead>
@@ -63,7 +61,6 @@
   </main>
 </div>
 
-<!-- ── Add/Edit Student Modal ── -->
 <div class="modal-overlay" id="modal-student">
   <div class="modal">
     <div class="modal-head">
@@ -127,7 +124,6 @@
   </div>
 </div>
 
-<!-- ── Confirm Delete Modal ── -->
 <div class="modal-overlay" id="modal-confirm">
   <div class="modal" style="width:420px;">
     <div class="modal-head">
@@ -148,7 +144,6 @@
   </div>
 </div>
 
-<!-- ── Visit History Modal ── -->
 <div class="modal-overlay" id="modal-history">
   <div class="modal">
     <div class="modal-head">
@@ -223,7 +218,6 @@ async function loadStudents() {
     </tr>`).join('');
 }
 
-/* ── Add Student ── */
 function openAddStudent() {
   editingStudentId = null;
   document.getElementById('student-modal-title').textContent = 'Register New Student';
@@ -234,7 +228,6 @@ function openAddStudent() {
   openModal('modal-student');
 }
 
-/* ── Edit Student ── */
 function openEditStudent(jsonStr) {
   const s = JSON.parse(jsonStr);
   editingStudentId = s.id;
@@ -249,7 +242,6 @@ function openEditStudent(jsonStr) {
   openModal('modal-student');
 }
 
-/* ── Submit Form ── */
 async function submitStudentForm() {
   const id         = document.getElementById('sf-id').value.trim().toUpperCase();
   const name       = document.getElementById('sf-name').value.trim();
@@ -277,7 +269,6 @@ async function submitStudentForm() {
   }
 }
 
-/* ── Confirm Delete ── */
 async function toggleBlock(id, name, currentlyBlocked) {
   const blocked = currentlyBlocked ? 0 : 1;
   const action  = blocked ? 'block' : 'unblock';
@@ -291,7 +282,6 @@ async function toggleBlock(id, name, currentlyBlocked) {
   }
 }
 
-/* ── Visit History ── */
 async function viewHistory(sid, name) {
   document.getElementById('history-title').textContent = `Visit History — ${name}`;
   document.getElementById('history-body').innerHTML =
