@@ -53,7 +53,6 @@
       <div style="max-width:580px;">
         <div class="card card-pad">
 
-          <!-- Search bar -->
           <div class="field">
             <label>Search Student (by ID or Name)</label>
             <div style="display:flex;gap:10px;">
@@ -68,7 +67,6 @@
             </div>
           </div>
 
-          <!-- Dynamic result area -->
           <div id="entry-result"></div>
 
         </div>
@@ -107,7 +105,6 @@ async function searchStudent() {
   selectedActivities = [];
   currentStudent = null;
 
-  // Try ID first, then name
   let r = await api('get_student', { params: { id: q } });
   if (!r.success) r = await api('get_student', { params: { name: q } });
 
@@ -126,7 +123,6 @@ async function searchStudent() {
 
   currentStudent = r.student;
 
-  // Check if already inside
   const visitsR = await api('get_visits', { params: { filter: 'active' } });
   const activeVisit = (visitsR.visits || []).find(v => v.student_id === currentStudent.id);
 
@@ -137,7 +133,6 @@ async function searchStudent() {
   }
 }
 
-/* ── Student is currently inside ── */
 function renderActiveStudent(visit) {
   document.getElementById('entry-result').innerHTML = `
     <div class="student-card">
@@ -166,7 +161,6 @@ function renderActiveStudent(visit) {
     </button>`;
 }
 
-/* ── New entry form ── */
 function renderNewEntry() {
   document.getElementById('entry-result').innerHTML = `
     <div class="student-card">
@@ -203,7 +197,6 @@ function renderNewEntry() {
     <p class="hint-text">Select at least one activity to approve entry.</p>`;
 }
 
-/* ── Toggle activity chip ── */
 function toggleChip(el, act) {
   if (selectedActivities.includes(act)) {
     selectedActivities = selectedActivities.filter(a => a !== act);
@@ -214,7 +207,6 @@ function toggleChip(el, act) {
   }
 }
 
-/* ── Approve ── */
 async function doApprove() {
   if (!selectedActivities.length) {
     toast('Please select at least one activity.', 'err');
@@ -238,7 +230,6 @@ async function doApprove() {
   }
 }
 
-/* ── Deny ── */
 async function doDeny() {
   const r = await api('deny_entry', { body: { student_id: currentStudent.id } });
   if (r.success) {
@@ -254,7 +245,6 @@ async function doDeny() {
   }
 }
 
-/* ── Mark Exit ── */
 async function markExit() {
   const r = await api('mark_exit', { body: { student_id: currentStudent.id } });
   if (r.success) {
