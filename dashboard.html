@@ -73,7 +73,6 @@
       </div>
       <p class="page-sub" id="dash-date"></p>
 
-      <!-- Stats -->
       <div class="stats-row">
         <div class="stat-card">
           <p class="stat-label">Total Students</p>
@@ -93,10 +92,8 @@
         </div>
       </div>
 
-      <!-- Two column -->
       <div class="dash-grid" style="margin-bottom:20px;">
 
-        <!-- Currently Inside -->
         <div class="card">
           <div class="card-header">
             <div class="card-header-row">
@@ -109,7 +106,6 @@
           </div>
         </div>
 
-        <!-- Today compact log -->
         <div class="card">
           <div class="card-header">
             <p class="card-title">Today's Check-In / Check-Out Log</p>
@@ -121,7 +117,6 @@
 
       </div>
 
-      <!-- Full today table -->
       <div class="card">
         <div class="card-header">
           <div class="card-header-row">
@@ -174,7 +169,6 @@ async function loadAll() {
     api('get_today_visits')
   ]);
 
-  // Stats
   if (stats.stats) {
     document.getElementById('stat-students').textContent = stats.stats.total_students;
     document.getElementById('stat-today').textContent    = stats.stats.today_visits;
@@ -182,7 +176,6 @@ async function loadAll() {
     document.getElementById('stat-total').textContent    = stats.stats.total_visits;
   }
 
-  // Currently Inside
   const insideEl    = document.getElementById('inside-list');
   const activeVisits = active.visits || [];
   if (!activeVisits.length) {
@@ -203,7 +196,6 @@ async function loadAll() {
       </div>`).join('');
   }
 
-  // Today compact log
   const todayVisits = today.visits || [];
   const logEl = document.getElementById('today-log');
   if (!todayVisits.length) {
@@ -228,7 +220,6 @@ async function loadAll() {
       </div>`).join('');
   }
 
-  // Today full table
   document.getElementById('today-count').textContent = `${todayVisits.length} visit${todayVisits.length!==1?'s':''}`;
   const tbody = document.getElementById('today-tbody');
   if (!todayVisits.length) {
