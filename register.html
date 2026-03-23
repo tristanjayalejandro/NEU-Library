@@ -44,7 +44,6 @@
     box-shadow: 0 20px 60px rgba(27,42,94,0.35);
   }
 
-  /* Steps */
   .steps { display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:24px; }
   .step  { display:flex; align-items:center; gap:7px; font-size:11px; color:#A0AEC0; letter-spacing:0.08em; text-transform:uppercase; font-weight:600; }
   .step.active { color:#B37F00; }
@@ -63,14 +62,12 @@
   .form-section.active { display:block; }
   .section-title { font-size:13px; font-weight:700; color:#1B2A5E; margin-bottom:18px; padding-bottom:10px; border-bottom:2px solid rgba(255,193,7,0.2); }
 
-  /* Review */
   .review-box { background:#F8F9FF; border:1px solid #E8ECF8; border-radius:10px; overflow:hidden; margin-bottom:16px; }
   .review-row { display:flex; padding:11px 16px; border-bottom:1px solid #EDF2F7; font-size:13px; }
   .review-row:last-child { border-bottom:none; }
   .review-label { color:#718096; width:130px; flex-shrink:0; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; font-weight:600; padding-top:1px; }
   .review-value { color:#1A202C; font-weight:500; }
 
-  /* Welcome screen (step 3) */
   .welcome-screen {
     text-align:center; padding:10px 0;
   }
@@ -132,7 +129,6 @@
 
   <div class="reg-body">
 
-    <!-- Steps -->
     <div class="steps" id="steps-indicator">
       <div class="step active" id="step-1-ind"><div class="step-num">1</div><span>Info</span></div>
       <div class="step-line" id="line-1"></div>
@@ -143,7 +139,6 @@
 
     <div id="reg-error" class="alert alert-error" style="display:none;"></div>
 
-    <!-- Step 1: Form -->
     <div class="form-section active" id="section-1">
       <p class="section-title">Fill in your information</p>
 
@@ -217,7 +212,6 @@
       </div>
     </div>
 
-    <!-- Step 2: Review -->
     <div class="form-section" id="section-2">
       <p class="section-title">Review your information</p>
       <div class="review-box" id="review-content"></div>
@@ -234,10 +228,8 @@
       </div>
     </div>
 
-    <!-- Step 3: Welcome Page -->
     <div class="form-section" id="section-3">
       <div class="welcome-screen">
-        <!-- Welcome Banner -->
         <div class="welcome-top">
           <div class="welcome-icon">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1B2A5E" stroke-width="2.5">
@@ -250,12 +242,10 @@
           <p class="welcome-name" id="welcome-name-display">You are now registered.</p>
         </div>
 
-        <!-- Student ID -->
         <p style="font-size:13px;color:#718096;margin-bottom:4px;">Your Student ID is:</p>
         <div class="student-id-box" id="success-id">—</div>
         <p style="font-size:12px;color:#A0AEC0;margin-bottom:4px;">Keep this ID. You will need it every time you enter the library.</p>
 
-        <!-- Library Rules -->
         <div class="rules-box">
           <p class="rules-title">📚 Library Guidelines</p>
           <div class="rule"><span class="rule-n">1.</span><span>Maintain silence inside the library at all times.</span></div>
@@ -265,7 +255,6 @@
           <div class="rule"><span class="rule-n">5.</span><span>Log your visit at the check-in kiosk upon entry and exit.</span></div>
         </div>
 
-        <!-- Buttons -->
         <div class="welcome-btns">
           <a href="libkiosk.html" class="btn btn-primary">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -280,7 +269,6 @@
       </div>
     </div>
 
-    <!-- Footer -->
     <div class="login-link">
       Already registered? <a href="libkiosk.html">Check In here</a>
       &nbsp;·&nbsp; <a href="index.html">Admin Login</a>
@@ -334,7 +322,6 @@
     btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Confirm & Register`;
 
     if (r.success) {
-      // Show welcome screen with student name and ID
       document.getElementById('success-id').textContent = formData.id;
       document.getElementById('welcome-name-display').textContent = `Hello, ${formData.name.split(' ')[0]}! You are now registered.`;
       document.getElementById('steps-indicator').style.display = 'none';
