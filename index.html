@@ -56,7 +56,6 @@
 
   .login-subtitle { text-align: center; font-size: 13px; color: #718096; margin-bottom: 28px; }
 
-  /* Error box */
   .error-box {
     display: none; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px;
     background: #FFF5F5; border: 1px solid rgba(229,62,62,0.3);
@@ -65,7 +64,6 @@
   }
   .error-box.show { display: flex; }
 
-  /* Google Button */
   .google-btn {
     display: flex; align-items: center; justify-content: center; gap: 12px;
     width: 100%; padding: 14px 20px;
@@ -81,12 +79,10 @@
     transform: translateY(-1px);
   }
 
-  /* Divider */
   .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
   .divider-line { flex: 1; height: 1px; background: #E2E8F0; }
   .divider-text { font-size: 11px; color: #A0AEC0; letter-spacing: 0.1em; text-transform: uppercase; }
 
-  /* Info box */
   .info-box {
     padding: 14px 16px; border-radius: 10px;
     background: #FFFBEB; border: 1px solid rgba(255,193,7,0.3);
@@ -102,7 +98,6 @@
   }
   .login-footer a { color: #B37F00; font-weight: 600; }
 
-  /* NEU badge */
   .neu-badge {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 5px 14px; border-radius: 20px; margin-bottom: 20px;
@@ -117,7 +112,6 @@
 <div class="login-wrapper">
   <div class="yellow-top"></div>
 
-  <!-- Header -->
   <div class="login-header">
     <div class="login-logo" style="background:none;box-shadow:none;width:80px;height:80px;">
       <img src="images/neu-logo.jpg" alt="NEU Logo" style="width:80px;height:80px;object-fit:contain;border-radius:50%;"/>
@@ -126,7 +120,6 @@
     <p>NEU Library Visitor Log</p>
   </div>
 
-  <!-- Body -->
   <div class="login-body">
 
     <div style="text-align:center;">
@@ -140,7 +133,6 @@
 
     <p class="login-subtitle">Sign in with your Google account to continue</p>
 
-    <!-- Error -->
     <div class="error-box" id="error-box">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -148,9 +140,7 @@
       <span id="error-msg">An error occurred.</span>
     </div>
 
-    <!-- Google Sign In Button -->
     <a class="google-btn" href="auth/login.php">
-      <!-- Google Logo SVG -->
       <svg width="20" height="20" viewBox="0 0 48 48">
         <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
         <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
@@ -166,7 +156,6 @@
       <div class="divider-line"></div>
     </div>
 
-    <!-- Info -->
     <div class="info-box">
       <p>
         Only <strong>authorized accounts</strong> can access this system.<br/>
@@ -184,7 +173,6 @@
 
 <script src="js/api.js"></script>
 <script>
-  // Show error messages from URL
   const errMap = {
     'invalid_state':    'Security error. Please try again.',
     'access_denied':    'Google sign-in was cancelled.',
@@ -200,7 +188,6 @@
     box.classList.add('show');
   }
 
-  // Auto-redirect if already logged in
   window.addEventListener('DOMContentLoaded', async () => {
     const r = await api('check_session');
     if (r.logged_in) {
