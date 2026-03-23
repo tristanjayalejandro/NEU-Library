@@ -100,7 +100,6 @@
       <h1 class="page-title">Visitor Statistics</h1>
       <p class="page-sub">Filter and analyze library visitor data by date, reason, college, and visitor type</p>
 
-      <!-- Preset tabs -->
       <div class="preset-tabs">
         <button class="preset-tab active" id="tab-today"  onclick="setPreset('today')">📅 Today</button>
         <button class="preset-tab"        id="tab-week"   onclick="setPreset('week')">📆 This Week</button>
@@ -108,7 +107,6 @@
         <button class="preset-tab"        id="tab-custom" onclick="setPreset('custom')">🔍 Custom Range</button>
       </div>
 
-      <!-- Filters -->
       <div class="filter-card">
         <p class="filter-title">🔍 Filter Options</p>
         <div class="filter-grid">
@@ -151,7 +149,6 @@
         </div>
       </div>
 
-      <!-- Stat Cards -->
       <div class="stats-grid">
         <div class="stat-box sb-yellow">
           <div class="sb-icon" style="background:rgba(255,193,7,0.12);">
@@ -203,7 +200,6 @@
         </div>
       </div>
 
-      <!-- Daily Trend -->
       <div class="daily-card">
         <div class="daily-head">
           <p class="daily-title">📊 Daily Visit Trend</p>
@@ -214,7 +210,6 @@
         </div>
       </div>
 
-      <!-- 3 Breakdown Charts -->
       <div class="charts-grid">
         <div class="chart-card">
           <p class="chart-title">🏷️ By Visit Reason</p>
@@ -278,7 +273,6 @@
 
     const s = r.stats;
 
-    // ── Stat cards — use exact field names from PHP compact() ──
     document.getElementById('s-total').textContent    = s.totalVisits    ?? 0;
     document.getElementById('s-unique').textContent   = s.uniqueVisitors ?? 0;
     document.getElementById('s-today').textContent    = s.todayCount     ?? 0;
@@ -286,10 +280,8 @@
     document.getElementById('s-active').textContent   = s.activeCount    ?? 0;
     document.getElementById('s-students').textContent = s.totalStudents  ?? 0;
 
-    // ── Daily chart ──
     renderDaily(s.daily || []);
 
-    // ── Breakdown bars ──
     renderBars('chart-reason',  s.byReason  || [], 'visit_reason',  'bf-y');
     renderBars('chart-college', s.byCollege || [], 'college',       'bf-b');
     renderBars('chart-emptype', s.byEmpType || [], 'employee_type', 'bf-g');
