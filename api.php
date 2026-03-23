@@ -7,7 +7,6 @@ require_once 'db.php';
 
 $action = $_REQUEST['action'] ?? '';
 
-// ── Helpers ───────────────────────────────────────────────────
 function respond($d) { echo json_encode($d); exit; }
 function error($msg, $code = 400) { http_response_code($code); respond(['success' => false, 'error' => $msg]); }
 function success($d = []) { respond(array_merge(['success' => true], $d)); }
@@ -24,11 +23,7 @@ function logAction($db, $action, $detail) {
 }
 
 switch ($action) {
-
-    // ── AUTH ─────────────────────────────────────────────────
     case 'login':
-        // Google OAuth handles login via auth/login.php and auth/callback.php
-        // This endpoint is kept for compatibility but not used directly
         error('Please use Google Sign-In to login.');
         break;
 
@@ -71,7 +66,6 @@ switch ($action) {
         success(['active_role' => $target]);
         break;
 
-    // ── ALLOWED USERS (Admin manages who can log in) ──────────
     case 'get_users':
         requireAdmin();
         $db   = getDB();
@@ -135,7 +129,6 @@ switch ($action) {
         $body = json_decode(file_get_contents('php://input'), true);
         $id   = intval($body['id'] ?? 0);
         if (!$id) error('ID required.');
-        // Prevent deleting yourself
         if ($id === $_SESSION['user_id']) error('You cannot delete your own account.');
 
         $db   = getDB();
@@ -167,8 +160,7 @@ switch ($action) {
         logAction($db, $action, "User ID $id has been " . ($blocked ? 'blocked' : 'unblocked'));
         success(['message' => $blocked ? 'User blocked.' : 'User unblocked.']);
         break;
-
-    // ── STUDENTS ─────────────────────────────────────────────
+    
     case 'get_students':
         requireAdmin();
         $db     = getDB();
@@ -225,7 +217,6 @@ switch ($action) {
         success();
         break;
 
-    // -- STUDENT SELF REGISTRATION (no login required) --
     case 'register_student':
         $body    = json_decode(file_get_contents('php://input'), true);
         $id      = strtoupper(trim($body['id']      ?? ''));
@@ -259,7 +250,6 @@ switch ($action) {
         if (!$id) error('ID required.');
         $db = getDB();
 
-        // Add blocked column if it doesn't exist
         $db->query("ALTER TABLE students ADD COLUMN IF NOT EXISTS blocked TINYINT(1) DEFAULT 0");
 
         $stmt = $db->prepare("UPDATE students SET blocked=? WHERE id=?");
@@ -306,7 +296,6 @@ switch ($action) {
         success();
         break;
 
-    // ── ENTRY ─────────────────────────────────────────────────
     case 'approve_entry':
         requireAdmin();
         $body        = json_decode(file_get_contents('php://input'), true);
@@ -320,7 +309,6 @@ switch ($action) {
         $student = $chk->get_result()->fetch_assoc();
         if (!$student) error('Student not found.');
 
-        // ── Check if student is blocked ──
         if (!empty($student['blocked']) && $student['blocked'] == 1) {
             error('Access denied. This student has been blocked from library access.');
         }
@@ -368,7 +356,6 @@ switch ($action) {
         success();
         break;
 
-    // ── STUDENT SELF CHECK-IN ─────────────────────────────────
     case 'student_checkin':
         $body        = json_decode(file_get_contents('php://input'), true);
         $sid         = strtoupper(trim($body['student_id']  ?? ''));
@@ -380,7 +367,6 @@ switch ($action) {
         $student = $chk->get_result()->fetch_assoc();
         if (!$student) error('Student ID not found. Please register first.');
 
-        // ── Check if student is blocked ──
         if (!empty($student['blocked']) && $student['blocked'] == 1) {
             error('Access denied. Your library access has been blocked. Please contact the librarian.');
         }
@@ -405,7 +391,6 @@ switch ($action) {
         }
         break;
 
-    // ── VISITS ────────────────────────────────────────────────
     case 'get_visits':
         requireLogin();
         $db     = getDB();
@@ -469,7 +454,6 @@ switch ($action) {
         success(['visits'=>$rows]);
         break;
 
-    // ── DASHBOARD STATS (simple, no date filter needed) ─────────
     case 'get_dashboard_stats':
         requireLogin();
         $db    = getDB();
@@ -480,8 +464,7 @@ switch ($action) {
         $total_visits   = $db->query("SELECT COUNT(*) as c FROM visits")->fetch_assoc()['c'];
         success(['stats' => compact('total_students','today_visits','active_visits','total_visits')]);
         break;
-
-    // ── STATS ─────────────────────────────────────────────────
+    
     case 'get_stats':
         requireAdmin();
         $db        = getDB();
