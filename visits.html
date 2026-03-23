@@ -19,7 +19,6 @@
       <h1 class="page-title">Visit History</h1>
       <p class="page-sub" id="visits-count" style="margin-bottom:0;">Loading...</p>
 
-      <!-- Filters -->
       <div class="filter-bar" style="margin-top:20px;">
         <div class="search-wrap">
           <span class="search-icon">
@@ -35,7 +34,6 @@
         <button class="btn btn-ghost btn-sm filter-btn"               id="vf-exited" onclick="setFilter('exited')">Exited</button>
       </div>
 
-      <!-- Table -->
       <div class="card table-wrap">
         <table>
           <thead>
@@ -86,7 +84,6 @@ function setFilter(f) {
   loadVisits();
 }
 
-// Set initial filter appearance
 document.addEventListener('DOMContentLoaded', () => setFilter('all'));
 
 async function loadVisits() {
