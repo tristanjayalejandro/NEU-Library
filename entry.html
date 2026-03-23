@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<link rel="icon" type="image/jpeg" href="favicon.jpg"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NEU Library — Library Entry</title>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+  .student-card {
+    padding: 18px 20px;
+    background: rgba(212,175,55,0.05);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 3px;
+    margin-bottom: 20px;
+  }
+  .student-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .decision-box {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px; border-radius: 3px;
+    font-size: 14px;
+  }
+  .decision-approved {
+    background: rgba(52,211,153,0.08);
+    border: 1px solid rgba(52,211,153,0.25);
+    color: var(--green);
+  }
+  .decision-denied {
+    background: rgba(220,50,50,0.08);
+    border: 1px solid rgba(220,50,50,0.25);
+    color: var(--red);
+  }
+  .action-row { display: flex; gap: 12px; margin-top: 20px; }
+  .hint-text { margin: 8px 0 0; color: var(--dim); font-size: 11px; }
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<div class="app-layout">
+  <div id="sidebar-placeholder"></div>
+
+  <main class="main-content">
+    <div class="page-wrap">
+
+      <h1 class="page-title">Library Entry Control</h1>
+      <p class="page-sub">Verify student identity and manage library access</p>
+
+      <div style="max-width:580px;">
+        <div class="card card-pad">
+
+          <!-- Search bar -->
+          <div class="field">
+            <label>Search Student (by ID or Name)</label>
+            <div style="display:flex;gap:10px;">
+              <input class="input" id="entry-search"
+                     placeholder="e.g. STU-001 or Juan dela Cruz..."/>
+              <button class="btn btn-primary btn-icon" onclick="searchStudent()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic result area -->
+          <div id="entry-result"></div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script>
+const ACTIVITIES = [
+  'Studying','Reading Books','Using Computers','Group Discussion',
+  'Research','Printing/Scanning','Borrowing Books','Attending Workshop'
+];
+let selectedActivities = [];
+let currentStudent = null;
+
+window.addEventListener('DOMContentLoaded', async () => {
+  await requireAuth();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('entry-search').addEventListener('keydown', e => {
+    if (e.key === 'Enter') searchStudent();
+  });
+});
+
+async function searchStudent() {
+  const q = document.getElementById('entry-search').value.trim();
+  if (!q) { toast('Please enter a student ID or name.', 'err'); return; }
+
+  const result = document.getElementById('entry-result');
+  result.innerHTML = '<div class="loading"><span class="spinner"></span>Searching...</div>';
+  selectedActivities = [];
+  currentStudent = null;
+
+  // Try ID first, then name
+  let r = await api('get_student', { params: { id: q } });
+  if (!r.success) r = await api('get_student', { params: { name: q } });
+
+  if (!r.success) {
+    result.innerHTML = `
+      <div class="alert alert-error">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        No student found with that ID or name.
+      </div>`;
+    return;
+  }
+
+  currentStudent = r.student;
+
+  // Check if already inside
+  const visitsR = await api('get_visits', { params: { filter: 'active' } });
+  const activeVisit = (visitsR.visits || []).find(v => v.student_id === currentStudent.id);
+
+  if (activeVisit) {
+    renderActiveStudent(activeVisit);
+  } else {
+    renderNewEntry();
+  }
+}
+
+/* ── Student is currently inside ── */
+function renderActiveStudent(visit) {
+  document.getElementById('entry-result').innerHTML = `
+    <div class="student-card">
+      <div class="student-card-head">
+        <div>
+          <h3 style="margin:0 0 5px;color:var(--text);font-size:17px;">${esc(currentStudent.name)}</h3>
+          <p style="margin:0 0 3px;color:var(--gold);font-size:12px;font-weight:600;">${esc(currentStudent.id)}</p>
+          <p style="margin:0;color:var(--muted);font-size:12px;">${esc(currentStudent.department)} · Age ${currentStudent.age}</p>
+        </div>
+        <span class="badge badge-green" style="border:1px solid rgba(52,211,153,0.3);">Currently Inside</span>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:6px;">
+      <strong style="color:var(--text);">Inside since:</strong> ${fmtDate(visit.entry_time)}
+    </p>
+    <p style="color:var(--dim);font-size:12px;margin-bottom:20px;">
+      Activities: ${esc(visit.activities || '—')}
+    </p>
+    <button class="btn btn-warning" onclick="markExit()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Mark as Exited
+    </button>`;
+}
+
+/* ── New entry form ── */
+function renderNewEntry() {
+  document.getElementById('entry-result').innerHTML = `
+    <div class="student-card">
+      <h3 style="margin:0 0 5px;color:var(--text);font-size:17px;">${esc(currentStudent.name)}</h3>
+      <p style="margin:0 0 3px;color:var(--gold);font-size:12px;font-weight:600;">${esc(currentStudent.id)}</p>
+      <p style="margin:0;color:var(--muted);font-size:12px;">${esc(currentStudent.department)} · Age ${currentStudent.age}</p>
+    </div>
+
+    <div class="field">
+      <label>Select Activities <span style="color:var(--red);">*</span></label>
+      <div class="chips" id="activity-chips">
+        ${ACTIVITIES.map(a =>
+          `<button class="chip" onclick="toggleChip(this,'${a}')">${a}</button>`
+        ).join('')}
+      </div>
+    </div>
+
+    <div id="entry-decision-area"></div>
+
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="doApprove()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Approve Entry
+      </button>
+      <button class="btn btn-danger" onclick="doDeny()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        Deny Entry
+      </button>
+    </div>
+    <p class="hint-text">Select at least one activity to approve entry.</p>`;
+}
+
+/* ── Toggle activity chip ── */
+function toggleChip(el, act) {
+  if (selectedActivities.includes(act)) {
+    selectedActivities = selectedActivities.filter(a => a !== act);
+    el.classList.remove('selected');
+  } else {
+    selectedActivities.push(act);
+    el.classList.add('selected');
+  }
+}
+
+/* ── Approve ── */
+async function doApprove() {
+  if (!selectedActivities.length) {
+    toast('Please select at least one activity.', 'err');
+    return;
+  }
+  const r = await api('approve_entry', {
+    body: { student_id: currentStudent.id, activities: selectedActivities }
+  });
+  if (r.success) {
+    document.getElementById('entry-result').innerHTML = `
+      <div class="decision-box decision-approved">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span>Entry approved! <strong>${esc(currentStudent.name)}</strong> has been logged in.</span>
+      </div>`;
+    toast('Entry approved!');
+    document.getElementById('entry-search').value = '';
+  } else {
+    toast(r.error || 'Failed to approve entry.', 'err');
+  }
+}
+
+/* ── Deny ── */
+async function doDeny() {
+  const r = await api('deny_entry', { body: { student_id: currentStudent.id } });
+  if (r.success) {
+    document.getElementById('entry-result').innerHTML = `
+      <div class="decision-box decision-denied">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        <span>Entry denied. This action has been logged.</span>
+      </div>`;
+    toast('Entry denied and logged.');
+    document.getElementById('entry-search').value = '';
+  }
+}
+
+/* ── Mark Exit ── */
+async function markExit() {
+  const r = await api('mark_exit', { body: { student_id: currentStudent.id } });
+  if (r.success) {
+    toast('Exit recorded successfully.');
+    document.getElementById('entry-search').value = '';
+    document.getElementById('entry-result').innerHTML = '';
+    currentStudent = null;
+  } else {
+    toast(r.error || 'Could not record exit.', 'err');
+  }
+}
+</script>
+</body>
+</html>

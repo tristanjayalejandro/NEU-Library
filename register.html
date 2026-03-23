@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<link rel="icon" type="image/jpeg" href="favicon.jpg"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NEU Library — Registration</title>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+  body {
+    background: url('images/neu-bg.jpg') center center / cover no-repeat fixed;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 40px 20px;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, rgba(27,42,94,0.82) 0%, rgba(45,64,128,0.75) 50%, rgba(27,42,94,0.82) 100%);
+    z-index: 0;
+  }
+  .reg-wrapper { position: relative; z-index: 1; }
+  .reg-wrapper { width: 100%; max-width: 520px; margin: auto; }
+  .yellow-bar  { height: 5px; background: linear-gradient(90deg,#FFC107,#E5A800,#FFC107); border-radius: 16px 16px 0 0; }
+
+  .reg-header {
+    background: linear-gradient(135deg, #152248, #1B2A5E);
+    padding: 28px 36px 24px; text-align: center;
+    border-bottom: 3px solid #FFC107;
+  }
+  .reg-logo-ring {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, #FFC107, #E5A800);
+    border-radius: 50%; margin-bottom: 14px;
+    box-shadow: 0 6px 20px rgba(255,193,7,0.35);
+  }
+  .reg-header h1 { font-size: 18px; color: #fff; margin-bottom: 3px; }
+  .reg-header p  { font-size: 11px; color: rgba(255,255,255,0.5); letter-spacing: 0.12em; text-transform: uppercase; }
+
+  .reg-body {
+    background: #fff; border-radius: 0 0 16px 16px;
+    padding: 28px 36px 32px;
+    box-shadow: 0 20px 60px rgba(27,42,94,0.35);
+  }
+
+  /* Steps */
+  .steps { display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:24px; }
+  .step  { display:flex; align-items:center; gap:7px; font-size:11px; color:#A0AEC0; letter-spacing:0.08em; text-transform:uppercase; font-weight:600; }
+  .step.active { color:#B37F00; }
+  .step.done   { color:#38A169; }
+  .step-num {
+    width:24px; height:24px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; background:#F0F2F8; border:1.5px solid #E2E8F0; flex-shrink:0;
+  }
+  .step.active .step-num { background:rgba(255,193,7,0.15); border-color:#FFC107; color:#B37F00; }
+  .step.done   .step-num { background:rgba(56,161,105,0.12); border-color:#38A169; color:#38A169; }
+  .step-line { width:36px; height:2px; background:#E2E8F0; margin:0 6px; border-radius:2px; }
+  .step-line.done { background:#38A169; }
+
+  .form-section        { display:none; }
+  .form-section.active { display:block; }
+  .section-title { font-size:13px; font-weight:700; color:#1B2A5E; margin-bottom:18px; padding-bottom:10px; border-bottom:2px solid rgba(255,193,7,0.2); }
+
+  /* Review */
+  .review-box { background:#F8F9FF; border:1px solid #E8ECF8; border-radius:10px; overflow:hidden; margin-bottom:16px; }
+  .review-row { display:flex; padding:11px 16px; border-bottom:1px solid #EDF2F7; font-size:13px; }
+  .review-row:last-child { border-bottom:none; }
+  .review-label { color:#718096; width:130px; flex-shrink:0; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; font-weight:600; padding-top:1px; }
+  .review-value { color:#1A202C; font-weight:500; }
+
+  /* Welcome screen (step 3) */
+  .welcome-screen {
+    text-align:center; padding:10px 0;
+  }
+  .welcome-top {
+    background: linear-gradient(135deg, #1B2A5E, #2d4080);
+    margin: -28px -36px 24px;
+    padding: 36px 36px 28px;
+    border-bottom: 4px solid #FFC107;
+  }
+  .welcome-icon {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: linear-gradient(135deg, #FFC107, #E5A800);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 24px rgba(255,193,7,0.4);
+  }
+  .welcome-neu  { font-size:11px; color:rgba(255,255,255,0.5); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:10px; }
+  .welcome-big  { font-size:28px; color:#fff; font-family:'Playfair Display',Georgia,serif; line-height:1.2; margin-bottom:6px; }
+  .welcome-big span { color:#FFC107; }
+  .welcome-name { font-size:13px; color:rgba(255,255,255,0.6); }
+
+  .student-id-box {
+    display:inline-block; padding:12px 32px;
+    background:rgba(255,193,7,0.1); border:2px solid rgba(255,193,7,0.4);
+    border-radius:10px; font-size:22px; font-weight:700;
+    color:#B37F00; font-family:'Playfair Display',serif;
+    letter-spacing:0.08em; margin:16px 0;
+  }
+
+  .rules-box {
+    background:#FFFBEB; border:1px solid rgba(255,193,7,0.3);
+    border-left:4px solid #FFC107; border-radius:10px;
+    padding:14px 16px; margin:16px 0; text-align:left;
+  }
+  .rules-title { font-size:11px; font-weight:700; color:#B37F00; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px; }
+  .rule { display:flex; gap:8px; font-size:12px; color:#4A5568; margin-bottom:5px; line-height:1.4; }
+  .rule-n { color:#B37F00; font-weight:700; flex-shrink:0; }
+
+  .welcome-btns { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:20px; }
+
+  .form-nav { display:flex; justify-content:space-between; align-items:center; margin-top:20px; }
+  .login-link { text-align:center; margin-top:20px; padding-top:16px; border-top:1px solid #E2E8F0; font-size:12px; color:#A0AEC0; }
+  .login-link a { color:#B37F00; font-weight:600; }
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<div class="reg-wrapper">
+  <div class="yellow-bar"></div>
+
+  <div class="reg-header">
+    <div class="reg-logo-ring">
+      <img src="images/neu-logo.jpg" alt="NEU" style="width:90%;height:90%;object-fit:contain;border-radius:50%;"/>
+    </div>
+    <h1>New Era University Library</h1>
+    <p>Student Registration Form</p>
+  </div>
+
+  <div class="reg-body">
+
+    <!-- Steps -->
+    <div class="steps" id="steps-indicator">
+      <div class="step active" id="step-1-ind"><div class="step-num">1</div><span>Info</span></div>
+      <div class="step-line" id="line-1"></div>
+      <div class="step" id="step-2-ind"><div class="step-num">2</div><span>Review</span></div>
+      <div class="step-line" id="line-2"></div>
+      <div class="step" id="step-3-ind"><div class="step-num">3</div><span>Welcome</span></div>
+    </div>
+
+    <div id="reg-error" class="alert alert-error" style="display:none;"></div>
+
+    <!-- Step 1: Form -->
+    <div class="form-section active" id="section-1">
+      <p class="section-title">Fill in your information</p>
+
+      <div class="field">
+        <label>Student ID <span style="color:#E53E3E;">*</span></label>
+        <input class="input" id="reg-id" placeholder="e.g. NEU-2024-001" oninput="this.value=this.value.toUpperCase()"/>
+        <p style="margin:5px 0 0;font-size:11px;color:#A0AEC0;">Use your school ID number — must be unique</p>
+      </div>
+
+      <div class="field">
+        <label>Full Name <span style="color:#E53E3E;">*</span></label>
+        <input class="input" id="reg-name" placeholder="First Middle Last Name"/>
+      </div>
+
+      <div class="input-row">
+        <div class="field">
+          <label>Age <span style="color:#E53E3E;">*</span></label>
+          <input class="input" id="reg-age" type="number" placeholder="e.g. 20" min="1" max="120"/>
+        </div>
+        <div class="field">
+          <label>Type <span style="color:#E53E3E;">*</span></label>
+          <select class="input" id="reg-emptype">
+            <option value="Student">Student</option>
+            <option value="Teacher">Teacher</option>
+            <option value="Staff">Staff</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>College <span style="color:#E53E3E;">*</span></label>
+        <select class="input" id="reg-college">
+              <option value="">Select your college...</option>
+              <option>College of Accountancy</option>
+              <option>College of Agriculture</option>
+              <option>College of Arts and Science</option>
+              <option>College of Business Administration</option>
+              <option>College of Communication</option>
+              <option>College of Criminology</option>
+              <option>College of Education</option>
+              <option>College of Engineering and Architecture</option>
+              <option>College of Informatics and Computing Studies</option>
+              <option>College of Law</option>
+              <option>College of Medical Technology</option>
+              <option>College of Medicine</option>
+              <option>College of Midwifery</option>
+              <option>College of Music</option>
+              <option>College of Nursing</option>
+              <option>College of Physical Therapy</option>
+              <option>College of Respiratory Therapy</option>
+              <option>School of Graduate Studies</option>
+              <option>School of International Relations</option>
+              <option>Integrated School</option>
+              <option>Alternative Learning System</option>
+              <option>Expanded Tertiary Education Equivalency and Accreditation Program (ETEEAP)</option>
+              <option>Administration / Staff</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Email <span style="color:#A0AEC0;font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+        <input class="input" id="reg-email" type="email" placeholder="yourname@neu.edu.ph"/>
+      </div>
+
+      <div class="form-nav">
+        <span></span>
+        <button class="btn btn-primary" onclick="goToReview()">
+          Next: Review
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Review -->
+    <div class="form-section" id="section-2">
+      <p class="section-title">Review your information</p>
+      <div class="review-box" id="review-content"></div>
+      <p style="font-size:12px;color:#718096;margin-bottom:16px;">Please check all details carefully before submitting.</p>
+      <div class="form-nav">
+        <button class="btn btn-ghost" onclick="goBack()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Go Back
+        </button>
+        <button class="btn btn-primary" id="submit-btn" onclick="submitRegistration()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Confirm & Register
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 3: Welcome Page -->
+    <div class="form-section" id="section-3">
+      <div class="welcome-screen">
+        <!-- Welcome Banner -->
+        <div class="welcome-top">
+          <div class="welcome-icon">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1B2A5E" stroke-width="2.5">
+              <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+            </svg>
+          </div>
+          <p class="welcome-neu">New Era University</p>
+          <h2 class="welcome-big">Welcome to <span>NEU Library!</span></h2>
+          <p class="welcome-name" id="welcome-name-display">You are now registered.</p>
+        </div>
+
+        <!-- Student ID -->
+        <p style="font-size:13px;color:#718096;margin-bottom:4px;">Your Student ID is:</p>
+        <div class="student-id-box" id="success-id">—</div>
+        <p style="font-size:12px;color:#A0AEC0;margin-bottom:4px;">Keep this ID. You will need it every time you enter the library.</p>
+
+        <!-- Library Rules -->
+        <div class="rules-box">
+          <p class="rules-title">📚 Library Guidelines</p>
+          <div class="rule"><span class="rule-n">1.</span><span>Maintain silence inside the library at all times.</span></div>
+          <div class="rule"><span class="rule-n">2.</span><span>Present your ID when entering the library.</span></div>
+          <div class="rule"><span class="rule-n">3.</span><span>Food and drinks are not allowed inside.</span></div>
+          <div class="rule"><span class="rule-n">4.</span><span>Return borrowed materials on time and in good condition.</span></div>
+          <div class="rule"><span class="rule-n">5.</span><span>Log your visit at the check-in kiosk upon entry and exit.</span></div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="welcome-btns">
+          <a href="libkiosk.html" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+            Go to Check-In Kiosk
+          </a>
+          <button class="btn btn-ghost" onclick="resetForm()">Register Another</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="login-link">
+      Already registered? <a href="libkiosk.html">Check In here</a>
+      &nbsp;·&nbsp; <a href="index.html">Admin Login</a>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  let formData = {};
+
+  function goToReview() {
+    hideAlert('reg-error');
+    const id      = document.getElementById('reg-id').value.trim().toUpperCase();
+    const name    = document.getElementById('reg-name').value.trim();
+    const age     = parseInt(document.getElementById('reg-age').value);
+    const emptype = document.getElementById('reg-emptype').value;
+    const college = document.getElementById('reg-college').value;
+    const email   = document.getElementById('reg-email').value.trim();
+
+    if (!id)     { showAlert('reg-error', 'Please enter your Student ID.'); return; }
+    if (!name)   { showAlert('reg-error', 'Please enter your full name.'); return; }
+    if (!age || isNaN(age) || age < 1 || age > 120) { showAlert('reg-error', 'Please enter a valid age.'); return; }
+    if (!college){ showAlert('reg-error', 'Please select your college.'); return; }
+
+    formData = { id, name, age, college, department: college, employee_type: emptype, email };
+
+    document.getElementById('review-content').innerHTML = `
+      <div class="review-row"><span class="review-label">Student ID</span><span class="review-value" style="color:#1B2A5E;font-weight:700;">${esc(id)}</span></div>
+      <div class="review-row"><span class="review-label">Full Name</span><span class="review-value">${esc(name)}</span></div>
+      <div class="review-row"><span class="review-label">Age</span><span class="review-value">${age}</span></div>
+      <div class="review-row"><span class="review-label">Type</span><span class="review-value">${esc(emptype)}</span></div>
+      <div class="review-row"><span class="review-label">College</span><span class="review-value">${esc(college)}</span></div>
+      ${email ? `<div class="review-row"><span class="review-label">Email</span><span class="review-value">${esc(email)}</span></div>` : ''}`;
+
+    showSection(2);
+  }
+
+  function goBack() { hideAlert('reg-error'); showSection(1); }
+
+  async function submitRegistration() {
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" style="width:13px;height:13px;border-width:2px;border-top-color:#1A202C;"></span> Registering...';
+    hideAlert('reg-error');
+
+    const r = await api('register_student', { body: formData });
+
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Confirm & Register`;
+
+    if (r.success) {
+      // Show welcome screen with student name and ID
+      document.getElementById('success-id').textContent = formData.id;
+      document.getElementById('welcome-name-display').textContent = `Hello, ${formData.name.split(' ')[0]}! You are now registered.`;
+      document.getElementById('steps-indicator').style.display = 'none';
+      showSection(3);
+    } else {
+      showAlert('reg-error', r.error || 'Registration failed. Please try again.');
+      showSection(1);
+    }
+  }
+
+  function resetForm() {
+    ['reg-id','reg-name','reg-age','reg-email'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('reg-college').value  = '';
+    document.getElementById('reg-emptype').value  = 'Student';
+    document.getElementById('steps-indicator').style.display = 'flex';
+    formData = {};
+    hideAlert('reg-error');
+    showSection(1);
+  }
+
+  function showSection(num) {
+    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+    document.getElementById(`section-${num}`).classList.add('active');
+    for (let i = 1; i <= 3; i++) {
+      const ind = document.getElementById(`step-${i}-ind`);
+      ind.className = 'step' + (i < num ? ' done' : i === num ? ' active' : '');
+    }
+    for (let i = 1; i <= 2; i++) {
+      document.getElementById(`line-${i}`).className = 'step-line' + (i < num ? ' done' : '');
+    }
+  }
+</script>
+</body>
+</html>

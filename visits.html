@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<link rel="icon" type="image/jpeg" href="favicon.jpg"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NEU Library — Visit History</title>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="toast"></div>
+
+<div class="app-layout">
+  <div id="sidebar-placeholder"></div>
+
+  <main class="main-content">
+    <div class="page-wrap">
+
+      <h1 class="page-title">Visit History</h1>
+      <p class="page-sub" id="visits-count" style="margin-bottom:0;">Loading...</p>
+
+      <!-- Filters -->
+      <div class="filter-bar" style="margin-top:20px;">
+        <div class="search-wrap">
+          <span class="search-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </span>
+          <input class="input" id="visit-search" placeholder="Search by name or ID..."
+                 style="width:260px;" oninput="loadVisits()"/>
+        </div>
+        <button class="btn btn-ghost btn-sm filter-btn active-filter" id="vf-all"    onclick="setFilter('all')">All Visits</button>
+        <button class="btn btn-ghost btn-sm filter-btn"               id="vf-active" onclick="setFilter('active')">Currently Inside</button>
+        <button class="btn btn-ghost btn-sm filter-btn"               id="vf-exited" onclick="setFilter('exited')">Exited</button>
+      </div>
+
+      <!-- Table -->
+      <div class="card table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Student Name</th>
+              <th>Student ID</th>
+              <th>Entry Time</th>
+              <th>Exit Time</th>
+              <th>Activities</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="visits-tbody">
+            <tr class="empty-row">
+              <td colspan="6">
+                <div class="loading"><span class="spinner"></span>Loading...</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script>
+let currentFilter = 'all';
+
+window.addEventListener('DOMContentLoaded', async () => {
+  await requireAuth();
+  loadVisits();
+});
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.style.opacity = '0.5';
+    btn.style.background = 'var(--gold-faint)';
+  });
+  const activeBtn = document.getElementById(`vf-${f}`);
+  if (activeBtn) {
+    activeBtn.style.opacity = '1';
+    activeBtn.style.background = 'rgba(212,175,55,0.25)';
+  }
+  loadVisits();
+}
+
+// Set initial filter appearance
+document.addEventListener('DOMContentLoaded', () => setFilter('all'));
+
+async function loadVisits() {
+  const search = document.getElementById('visit-search').value;
+  const r = await api('get_visits', { params: { filter: currentFilter, search } });
+  const visits = r.visits || [];
+
+  document.getElementById('visits-count').textContent = `${visits.length} visit(s) found`;
+
+  const tbody = document.getElementById('visits-tbody');
+  if (!visits.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No visits found matching your criteria.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = visits.map(v => `
+    <tr>
+      <td class="td-name">${esc(v.student_name || 'Unknown')}</td>
+      <td class="td-id">${esc(v.student_id)}</td>
+      <td class="td-dim">${fmtDate(v.entry_time)}</td>
+      <td class="td-dim">${v.exit_time ? fmtDate(v.exit_time) : '—'}</td>
+      <td style="color:var(--muted);font-size:12px;max-width:200px;
+                 overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+          title="${esc(v.activities || '')}">
+        ${esc(v.activities || '—')}
+      </td>
+      <td>
+        <span class="badge ${v.status === 'active' ? 'badge-green' : 'badge-gray'}">
+          ${v.status === 'active' ? 'Inside' : 'Exited'}
+        </span>
+      </td>
+    </tr>`).join('');
+}
+</script>
+</body>
+</html>

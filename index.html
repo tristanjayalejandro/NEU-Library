@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<link rel="icon" type="image/jpeg" href="favicon.jpg"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NEU Library — Sign In</title>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+  body {
+    background: url('images/neu-bg.jpg') center center / cover no-repeat fixed;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 20px; overflow: hidden;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, rgba(27,42,94,0.82) 0%, rgba(45,64,128,0.75) 50%, rgba(27,42,94,0.82) 100%);
+    z-index: 0;
+  }
+  .login-wrapper { position: relative; z-index: 1; }
+
+  /* Background dots */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none;
+    background-image: radial-gradient(rgba(255,193,7,0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .login-wrapper { width: 100%; max-width: 420px; position: relative; z-index: 1; }
+
+  .yellow-top { height: 5px; background: linear-gradient(90deg,#FFC107,#E5A800,#FFC107); border-radius: 16px 16px 0 0; }
+
+  .login-header {
+    background: linear-gradient(135deg, #152248, #1B2A5E);
+    padding: 36px 40px 28px; text-align: center;
+    border-bottom: 3px solid #FFC107;
+  }
+  .login-logo {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 70px; height: 70px;
+    background: linear-gradient(135deg, #FFC107, #E5A800);
+    border-radius: 50%; margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(255,193,7,0.35);
+  }
+  .login-header h1 { font-size: 20px; color: #fff; margin-bottom: 4px; font-family: 'Playfair Display', Georgia, serif; }
+  .login-header p  { font-size: 11px; color: rgba(255,255,255,0.45); letter-spacing: 0.15em; text-transform: uppercase; }
+
+  .login-body {
+    background: #fff; border-radius: 0 0 16px 16px;
+    padding: 32px 36px 36px;
+    box-shadow: 0 20px 60px rgba(27,42,94,0.4);
+  }
+
+  .login-subtitle { text-align: center; font-size: 13px; color: #718096; margin-bottom: 28px; }
+
+  /* Error box */
+  .error-box {
+    display: none; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px;
+    background: #FFF5F5; border: 1px solid rgba(229,62,62,0.3);
+    color: #E53E3E; font-size: 13px; font-weight: 500;
+    align-items: center; gap: 8px;
+  }
+  .error-box.show { display: flex; }
+
+  /* Google Button */
+  .google-btn {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    width: 100%; padding: 14px 20px;
+    background: #fff; border: 1.5px solid #E2E8F0;
+    border-radius: 10px; cursor: pointer;
+    font-size: 14px; font-weight: 600; color: #1A202C;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.2s; text-decoration: none;
+  }
+  .google-btn:hover {
+    background: #F8F9FF; border-color: #CBD5E0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    transform: translateY(-1px);
+  }
+
+  /* Divider */
+  .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
+  .divider-line { flex: 1; height: 1px; background: #E2E8F0; }
+  .divider-text { font-size: 11px; color: #A0AEC0; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* Info box */
+  .info-box {
+    padding: 14px 16px; border-radius: 10px;
+    background: #FFFBEB; border: 1px solid rgba(255,193,7,0.3);
+    border-left: 4px solid #FFC107;
+  }
+  .info-box p { font-size: 12px; color: #92400E; line-height: 1.5; }
+  .info-box strong { color: #B37F00; }
+
+  .login-footer {
+    margin-top: 24px; padding-top: 16px;
+    border-top: 1px solid #E2E8F0;
+    text-align: center; font-size: 12px; color: #A0AEC0;
+  }
+  .login-footer a { color: #B37F00; font-weight: 600; }
+
+  /* NEU badge */
+  .neu-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px; border-radius: 20px; margin-bottom: 20px;
+    background: rgba(49,130,206,0.08); border: 1px solid rgba(49,130,206,0.2);
+    font-size: 11px; color: #3182CE; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<div class="login-wrapper">
+  <div class="yellow-top"></div>
+
+  <!-- Header -->
+  <div class="login-header">
+    <div class="login-logo" style="background:none;box-shadow:none;width:80px;height:80px;">
+      <img src="images/neu-logo.jpg" alt="NEU Logo" style="width:80px;height:80px;object-fit:contain;border-radius:50%;"/>
+    </div>
+    <h1>New Era University Library</h1>
+    <p>NEU Library Visitor Log</p>
+  </div>
+
+  <!-- Body -->
+  <div class="login-body">
+
+    <div style="text-align:center;">
+      <div class="neu-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        Authorized Access Only
+      </div>
+    </div>
+
+    <p class="login-subtitle">Sign in with your Google account to continue</p>
+
+    <!-- Error -->
+    <div class="error-box" id="error-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span id="error-msg">An error occurred.</span>
+    </div>
+
+    <!-- Google Sign In Button -->
+    <a class="google-btn" href="auth/login.php">
+      <!-- Google Logo SVG -->
+      <svg width="20" height="20" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      Sign in with Google
+    </a>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span class="divider-text">Note</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- Info -->
+    <div class="info-box">
+      <p>
+        Only <strong>authorized accounts</strong> can access this system.<br/>
+        Contact the library admin to get access.
+      </p>
+    </div>
+
+    <div class="login-footer">
+      Not a user? <a href="register.html">Register as student</a>
+      &nbsp;·&nbsp; <a href="libkiosk.html">Library Kiosk</a>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  // Show error messages from URL
+  const errMap = {
+    'invalid_state':    'Security error. Please try again.',
+    'access_denied':    'Google sign-in was cancelled.',
+    'token_failed':     'Authentication failed. Please try again.',
+    'no_email':         'Could not get email from Google.',
+    'not_authorized':   'Your Google account is not authorized to access this system. Please contact the library admin.',
+  };
+  const params = new URLSearchParams(window.location.search);
+  const err    = params.get('error');
+  if (err) {
+    const box = document.getElementById('error-box');
+    document.getElementById('error-msg').textContent = errMap[err] || 'Login failed. Please try again.';
+    box.classList.add('show');
+  }
+
+  // Auto-redirect if already logged in
+  window.addEventListener('DOMContentLoaded', async () => {
+    const r = await api('check_session');
+    if (r.logged_in) {
+      window.location.href = r.active_role === 'admin' ? 'dashboard.html' : 'welcome.html';
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<link rel="icon" type="image/jpeg" href="favicon.jpg"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NEU Library — Check-In Kiosk</title>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+  body {
+    background: url('images/neu-bg.jpg') center center / cover no-repeat fixed;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 40px 20px;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, rgba(27,42,94,0.82) 0%, rgba(45,64,128,0.75) 50%, rgba(27,42,94,0.82) 100%);
+    z-index: 0;
+  }
+
+  /* Clock */
+  .live-clock { z-index: 10; position: relative;
+    position: fixed; top: 20px; right: 28px; text-align: right; z-index: 10;
+  }
+  .clock-time { font-size: 26px; font-weight: 700; font-family: 'Playfair Display',Georgia,serif; color: #fff; letter-spacing: 0.04em; }
+  .clock-date { font-size: 11px; color: rgba(255,255,255,0.45); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+
+  /* Header */
+  .kiosk-header { text-align: center; margin-bottom: 0; position: relative; z-index: 1; flex-shrink: 0; max-width: 260px; }
+  .kiosk-logo {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 100px; height: 100px;
+    background: linear-gradient(135deg, #FFC107, #E5A800);
+    border-radius: 50%; margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(255,193,7,0.3);
+  }
+  .kiosk-header h1 { font-size: 26px; color: #fff; font-family: 'Playfair Display',Georgia,serif; margin-bottom: 8px; line-height: 1.2; }
+  .kiosk-header p  { font-size: 11px; color: rgba(255,255,255,0.5); letter-spacing: 0.12em; text-transform: uppercase; }
+
+  /* Main card */
+  .kiosk-card {
+    width: 100%; max-width: 500px; position: relative; z-index: 1;
+    background: #fff; border-radius: 20px; overflow: hidden;
+    box-shadow: 0 24px 60px rgba(27,42,94,0.4);
+  }
+  .kiosk-card-header {
+    background: linear-gradient(135deg, #152248, #1B2A5E);
+    padding: 18px 24px; border-bottom: 3px solid #FFC107;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .kiosk-card-icon {
+    width: 38px; height: 38px; border-radius: 8px;
+    background: rgba(255,193,7,0.15);
+    display: flex; align-items: center; justify-content: center;
+    color: #FFC107; flex-shrink: 0;
+  }
+  .kiosk-card-header h2 { font-size: 15px; color: #fff; margin-bottom: 2px; }
+  .kiosk-card-header p  { font-size: 11px; color: rgba(255,255,255,0.5); }
+  .kiosk-card-body { padding: 24px; }
+
+  /* ID Input */
+  .id-input {
+    width: 100%; padding: 16px 18px;
+    font-size: 20px; font-weight: 700;
+    font-family: 'Playfair Display',Georgia,serif;
+    letter-spacing: 0.1em; text-align: center; text-transform: uppercase;
+    background: #F8F9FF; border: 2px solid #E2E8F0;
+    border-radius: 10px; color: #1B2A5E; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .id-input:focus { border-color: #FFC107; box-shadow: 0 0 0 3px rgba(255,193,7,0.15); }
+  .id-input::placeholder { color: #A0AEC0; font-size: 14px; letter-spacing: 0.03em; font-family: 'Poppins',sans-serif; font-weight: 400; }
+
+  /* Reason selection */
+  .reason-section { margin-top: 18px; }
+  .reason-label { font-size: 11px; font-weight: 700; color: #1B2A5E; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+  .reason-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .reason-btn {
+    padding: 10px 12px; border-radius: 8px;
+    border: 1.5px solid #E2E8F0; background: #F8F9FF;
+    color: #718096; cursor: pointer; font-size: 12px; font-weight: 500;
+    text-align: center; transition: all 0.15s; line-height: 1.3;
+  }
+  .reason-btn:hover   { border-color: #FFC107; color: #B37F00; background: #FFFBEB; }
+  .reason-btn.selected { border-color: #FFC107; background: rgba(255,193,7,0.1); color: #B37F00; font-weight: 700; }
+
+  /* Check-in button */
+  .checkin-btn {
+    width: 100%; padding: 15px; margin-top: 18px;
+    font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    border: none; border-radius: 10px; cursor: pointer;
+    background: linear-gradient(135deg, #FFC107, #E5A800);
+    color: #1A202C; box-shadow: 0 4px 16px rgba(255,193,7,0.35);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: all 0.15s;
+  }
+  .checkin-btn:hover    { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,193,7,0.45); }
+  .checkin-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* Result box */
+  .result-box { display:none; margin-top:18px; padding:20px; border-radius:12px; text-align:center; animation:popIn 0.3s ease; }
+  .result-box.show { display:block; }
+  @keyframes popIn { from{transform:scale(0.95);opacity:0} to{transform:scale(1);opacity:1} }
+
+  .result-checkin  { background:#F0FFF4; border:1.5px solid rgba(56,161,105,0.3); }
+  .result-checkout { background:#EBF8FF; border:1.5px solid rgba(49,130,206,0.3); }
+  .result-error    { background:#FFF5F5; border:1.5px solid rgba(229,62,62,0.3); }
+
+  .result-icon {
+    width:54px; height:54px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; margin:0 auto 12px;
+  }
+  .result-checkin  .result-icon { background:rgba(56,161,105,0.12); color:#38A169; }
+  .result-checkout .result-icon { background:rgba(49,130,206,0.12);  color:#3182CE; }
+  .result-error    .result-icon { background:rgba(229,62,62,0.1);    color:#E53E3E; }
+
+  .result-tag   { font-size:10px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; margin-bottom:6px; }
+  .result-checkin  .result-tag  { color:#38A169; }
+  .result-checkout .result-tag  { color:#3182CE; }
+  .result-error    .result-tag  { color:#E53E3E; }
+
+  .result-name { font-size:20px; font-weight:700; color:#1A202C; font-family:'Playfair Display',serif; margin-bottom:4px; }
+  .result-id   { font-size:12px; color:#718096; margin-bottom:6px; }
+  .result-time { font-size:14px; font-weight:700; }
+  .result-checkin  .result-time { color:#38A169; }
+  .result-checkout .result-time { color:#3182CE; }
+  .result-reason { font-size:11px; color:#A0AEC0; margin-top:4px; }
+
+  /* Currently inside list */
+
+  .admin-link { position:fixed; bottom:18px; left:50%; transform:translateX(-50%); font-size:11px; color:rgba(255,255,255,0.3); z-index:10; }
+  .admin-link a { color:rgba(255,193,7,0.5); }
+  .admin-link a:hover { color:#FFC107; }
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- Clock -->
+<div class="live-clock">
+  <div class="clock-time" id="clock-time">00:00:00</div>
+  <div class="clock-date" id="clock-date"></div>
+</div>
+
+<!-- Header -->
+<div class="kiosk-header">
+  <div class="kiosk-logo">
+      <img src="images/neu-logo.jpg" alt="NEU" style="width:90%;height:90%;object-fit:contain;border-radius:50%;"/>
+    </div>
+  <h1>New Era University Library</h1>
+  <p>Student Check-In / Check-Out Kiosk</p>
+</div>
+
+<!-- Kiosk Card -->
+<div class="kiosk-card">
+  <div class="kiosk-card-header">
+    <div class="kiosk-card-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M13 4H3v16h10"/><path d="M13 4l8 4v8l-8 4V4z"/><circle cx="17" cy="12" r="1"/>
+      </svg>
+    </div>
+    <div>
+      <h2>Library Check-In / Check-Out</h2>
+      <p>Enter your Student ID to log your visit</p>
+    </div>
+  </div>
+
+  <div class="kiosk-card-body">
+
+    <!-- Student ID input -->
+    <div class="field" style="margin-bottom:0;">
+      <label style="color:#1B2A5E;">Student ID</label>
+      <input class="id-input" id="student-id-input"
+             placeholder="Enter your Student ID..."
+             maxlength="30" autocomplete="off" autofocus/>
+    </div>
+
+    <!-- Reason selection -->
+    <div class="reason-section" id="reason-section">
+      <p class="reason-label">Reason for Visit <span style="color:#E53E3E;">*</span></p>
+      <div class="reason-grid">
+        <button class="reason-btn" onclick="selectReason(this, 'Studying')">📖 Studying</button>
+        <button class="reason-btn" onclick="selectReason(this, 'Reading Books')">📚 Reading Books</button>
+        <button class="reason-btn" onclick="selectReason(this, 'Using Computers')">💻 Using Computers</button>
+        <button class="reason-btn" onclick="selectReason(this, 'Research')">🔬 Research</button>
+        <button class="reason-btn" onclick="selectReason(this, 'Borrowing Books')">📦 Borrowing Books</button>
+        <button class="reason-btn" onclick="selectReason(this, 'Returning Books')">🔄 Returning Books</button>
+        <button class="reason-btn" onclick="selectReason(this, 'Printing / Scanning')">🖨️ Printing / Scanning</button>
+        <button class="reason-btn" onclick="selectReason(this, 'Group Discussion')">👥 Group Discussion</button>
+      </div>
+    </div>
+
+    <!-- Check-in Button -->
+    <button class="checkin-btn" id="checkin-btn" onclick="doCheckin()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+        <polyline points="10 17 15 12 10 7"/>
+        <line x1="15" y1="12" x2="3" y2="12"/>
+      </svg>
+      Check In / Check Out
+    </button>
+
+    <!-- Result -->
+    <div class="result-box" id="result-box"></div>
+
+  </div>
+</div>
+
+</div>
+
+<div class="admin-link">
+  <a href="index.html">Admin Login</a> &nbsp;·&nbsp;
+  <a href="register.html">Register</a>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  let selectedReason = '';
+
+  // ── Clock ──────────────────────────────────────────────────
+  function updateClock() {
+    const now = new Date();
+    const phTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+    document.getElementById('clock-time').textContent =
+      phTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    document.getElementById('clock-date').textContent =
+      phTime.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // ── Enter key ──────────────────────────────────────────────
+  document.getElementById('student-id-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doCheckin();
+  });
+  document.getElementById('student-id-input').addEventListener('input', function() {
+    this.value = this.value.toUpperCase();
+  });
+
+  // ── Auto detect if checking in or out ──────────────────────
+  document.getElementById('student-id-input').addEventListener('blur', async function() {
+    const sid = this.value.trim().toUpperCase();
+    if (!sid) return;
+    const checkActive = await api('get_active_visits');
+    const isInside = (checkActive.visits || []).find(v => v.student_id === sid);
+    const reasonSection = document.getElementById('reason-section');
+    if (isInside) {
+      // Student is checking OUT - hide reason selection
+      reasonSection.style.display = 'none';
+      reasonSection.style.opacity = '0.5';
+      document.getElementById('checkin-btn').innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Check Out`;
+    } else {
+      // Student is checking IN - show reason selection
+      reasonSection.style.display = 'block';
+      reasonSection.style.opacity = '1';
+      document.getElementById('checkin-btn').innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        Check In`;
+    }
+  });
+
+  // ── Select reason ──────────────────────────────────────────
+  function selectReason(el, reason) {
+    document.querySelectorAll('.reason-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedReason = reason;
+  }
+
+  // ── Check In / Out ─────────────────────────────────────────
+  async function doCheckin() {
+    const sid = document.getElementById('student-id-input').value.trim().toUpperCase();
+    const btn = document.getElementById('checkin-btn');
+
+    if (!sid) { showError('Please enter your Student ID.'); return; }
+
+    // Check if student is currently inside first
+    const checkActive = await api('get_active_visits');
+    const isInside = (checkActive.visits || []).find(v => v.student_id === sid);
+
+    // Only require reason if checking IN (not checking OUT)
+    if (!isInside && !selectedReason) {
+      showError('Please select a reason for your visit.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;border-top-color:#1A202C;"></span> Processing...';
+
+    const r = await api('student_checkin', { body: { student_id: sid, visit_reason: selectedReason || 'Library Visit' } });
+
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Check In / Check Out`;
+    // Reset reason section visibility
+    document.getElementById('reason-section').style.display = 'block';
+    document.getElementById('reason-section').style.opacity = '1';
+
+    if (!r.success) { showError(r.error || 'Something went wrong. Please try again.'); return; }
+
+    const timeStr = new Date(r.time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    showResult(r.action, r.student, timeStr, selectedReason);
+
+    // Reset
+    document.getElementById('student-id-input').value = '';
+    document.getElementById('student-id-input').focus();
+    document.querySelectorAll('.reason-btn').forEach(b => b.classList.remove('selected'));
+    selectedReason = '';
+
+      setTimeout(() => { document.getElementById('result-box').classList.remove('show'); }, 6000);
+  }
+
+  function showResult(type, student, time, reason) {
+    const isIn = type === 'checkin';
+    const box  = document.getElementById('result-box');
+    box.className = `result-box show result-${type}`;
+    box.innerHTML = `
+      <div class="result-icon">
+        ${isIn
+          ? `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
+          : `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`}
+      </div>
+      <p class="result-tag">${isIn ? '✓ Checked In' : '← Checked Out'}</p>
+      <p class="result-name">${esc(student.name)}</p>
+      <p class="result-id">${esc(student.id)} · ${esc(student.college)}</p>
+      <p class="result-time">${isIn ? 'Entered at' : 'Exited at'} ${time}</p>
+      ${isIn ? `<p class="result-reason">Reason: ${esc(reason)}</p>` : ''}`;
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('result-box');
+    box.className = 'result-box show result-error';
+    box.innerHTML = `
+      <div class="result-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <p class="result-tag">Error</p>
+      <p style="color:#E53E3E;font-size:14px;">${esc(msg)}</p>`;
+    setTimeout(() => box.classList.remove('show'), 4000);
+  }
+
+  
+</script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<link rel="icon" type="image/jpeg" href="favicon.jpg"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NEU Library — Welcome</title>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+  body {
+    background: linear-gradient(135deg, #1B2A5E 0%, #2d4080 60%, #1B2A5E 100%);
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 24px;
+  }
+  .welcome-card {
+    width: 100%; max-width: 480px;
+    background: #fff; border-radius: 20px; overflow: hidden;
+    box-shadow: 0 24px 64px rgba(27,42,94,0.4);
+  }
+  .welcome-banner {
+    background: linear-gradient(135deg, #152248, #1B2A5E);
+    padding: 36px 40px 28px; text-align: center;
+    border-bottom: 5px solid #FFC107;
+  }
+  .neu-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 68px; height: 68px;
+    background: linear-gradient(135deg, #FFC107, #E5A800);
+    border-radius: 50%; margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(255,193,7,0.4);
+  }
+  .neu-label {
+    font-size: 11px; color: rgba(255,255,255,0.55);
+    letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 10px; font-family: 'Poppins', sans-serif;
+  }
+  .welcome-msg {
+    font-size: 30px; color: #fff;
+    font-family: 'Playfair Display', Georgia, serif;
+    line-height: 1.2; margin-bottom: 6px;
+  }
+  .welcome-msg .highlight { color: #FFC107; }
+  .welcome-sub { font-size: 13px; color: rgba(255,255,255,0.5); }
+
+  .welcome-body { padding: 26px 32px 30px; }
+
+  .user-row {
+    display: flex; align-items: center; gap: 13px;
+    padding: 14px 16px; background: #F8F9FF;
+    border: 1px solid #E8ECF8; border-radius: 12px; margin-bottom: 18px;
+  }
+  .user-avatar {
+    width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #FFC107, #E5A800);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #1B2A5E;
+    font-family: 'Playfair Display', serif;
+  }
+  .user-name  { font-size: 14px; font-weight: 600; color: #1A202C; }
+  .user-email { font-size: 11px; color: #718096; margin-top: 2px; }
+  .role-chip  {
+    margin-left: auto; padding: 4px 12px; border-radius: 20px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+    background: rgba(27,42,94,0.08); color: #1B2A5E;
+    border: 1px solid rgba(27,42,94,0.15); flex-shrink: 0;
+  }
+
+  .time-bar {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: #718096; margin-bottom: 18px;
+  }
+  .time-val { font-weight: 600; color: #1A202C; }
+
+  .rules-box {
+    background: #FFFBEB; border: 1px solid rgba(255,193,7,0.3);
+    border-left: 4px solid #FFC107; border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 20px;
+  }
+  .rules-title { font-size: 11px; font-weight: 700; color: #B37F00; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+  .rule { display: flex; gap: 8px; font-size: 12px; color: #4A5568; margin-bottom: 5px; line-height: 1.4; }
+  .rule-n { color: #B37F00; font-weight: 700; flex-shrink: 0; }
+
+  .action-area { display: flex; flex-direction: column; gap: 10px; }
+
+  .btn-switch-admin {
+    display: none;
+    align-items: center; justify-content: center; gap: 8px;
+    padding: 13px; border-radius: 10px;
+    border: 2px solid #FFC107; background: rgba(255,193,7,0.1);
+    color: #B37F00; font-size: 13px; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-switch-admin:hover { background: rgba(255,193,7,0.2); }
+
+  .btn-goto-dashboard {
+    display: none;
+    align-items: center; justify-content: center; gap: 8px;
+    padding: 13px; border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #1B2A5E, #2d4080);
+    color: #fff; font-size: 13px; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer;
+    transition: all 0.15s; box-shadow: 0 4px 14px rgba(27,42,94,0.3);
+  }
+  .btn-goto-dashboard:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .btn-signout {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px; border-radius: 10px;
+    border: 1px solid #E2E8F0; background: transparent;
+    color: #718096; font-size: 12px; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-signout:hover { background: #FFF5F5; color: #E53E3E; border-color: rgba(229,62,62,0.3); }
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<div class="welcome-card">
+
+  <!-- Banner -->
+  <div class="welcome-banner">
+    <div class="neu-icon">
+      <img src="images/neu-logo.jpg" alt="NEU" style="width:90%;height:90%;object-fit:contain;border-radius:50%;"/>
+    </div>
+    <p class="neu-label">New Era University</p>
+    <h1 class="welcome-msg">Welcome to <span class="highlight">NEU Library!</span></h1>
+    <p class="welcome-sub" id="welcome-sub">You are now signed in.</p>
+  </div>
+
+  <!-- Body -->
+  <div class="welcome-body">
+
+    <!-- User Info -->
+    <div class="user-row">
+      <div class="user-avatar" id="user-avatar">?</div>
+      <div>
+        <div class="user-name"  id="user-name">Loading...</div>
+        <div class="user-email" id="user-email">—</div>
+      </div>
+      <div class="role-chip" id="role-chip">User</div>
+    </div>
+
+    <!-- Time -->
+    <div class="time-bar">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B37F00" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span>Current time:</span>
+      <span class="time-val" id="live-time">—</span>
+    </div>
+
+    <!-- Rules -->
+    <div class="rules-box">
+      <p class="rules-title">📚 Library Guidelines</p>
+      <div class="rule"><span class="rule-n">1.</span><span>Maintain silence inside the library at all times.</span></div>
+      <div class="rule"><span class="rule-n">2.</span><span>Present your ID when entering the library.</span></div>
+      <div class="rule"><span class="rule-n">3.</span><span>Food and drinks are not allowed inside.</span></div>
+      <div class="rule"><span class="rule-n">4.</span><span>Return borrowed materials on time and in good condition.</span></div>
+      <div class="rule"><span class="rule-n">5.</span><span>Log your visit at the check-in kiosk upon entry and exit.</span></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="action-area">
+
+      <!-- Go to Dashboard button (shown when active_role is already admin) -->
+      <button class="btn-goto-dashboard" id="btn-dashboard" onclick="window.location.href='dashboard.html'">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        Go to Admin Dashboard
+      </button>
+
+      <!-- Switch to Admin button (shown when active_role is user but has admin role) -->
+      <button class="btn-switch-admin" id="btn-switch-admin" onclick="switchToAdmin()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        Switch to Admin View
+      </button>
+
+      <!-- Sign Out -->
+      <button class="btn-signout" onclick="doLogout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Sign Out
+      </button>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', async () => {
+  const r = await api('check_session');
+
+  // Not logged in → go to login
+  if (!r.logged_in) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  // Fill user info
+  const initials = r.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  const avatarEl = document.getElementById('user-avatar');
+  if (r.avatar) { avatarEl.innerHTML = `<img src="${r.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${initials}'"/>`; } else { avatarEl.textContent = initials; }
+  document.getElementById('user-name').textContent     = r.name;
+  document.getElementById('user-email').textContent    = r.email;
+  document.getElementById('welcome-sub').textContent   = `Hello, ${r.name.split(' ')[0]}! Have a great visit.`;
+
+  // Set role chip
+  const isAdminRole   = r.role        === 'admin';
+  const isAdminActive = r.active_role === 'admin';
+
+  document.getElementById('role-chip').textContent = isAdminActive ? 'Admin' : 'Regular User';
+
+  // Show correct button based on role state
+  if (isAdminActive) {
+    // Already in admin mode — show "Go to Dashboard"
+    document.getElementById('btn-dashboard').style.display = 'flex';
+  } else if (isAdminRole) {
+    // Has admin role but currently in user mode — show "Switch to Admin"
+    document.getElementById('btn-switch-admin').style.display = 'flex';
+  }
+
+  // Live clock
+  setInterval(() => {
+    document.getElementById('live-time').textContent =
+      new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }, 1000);
+  document.getElementById('live-time').textContent =
+    new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+});
+
+async function doLogout() {
+  await api("logout", { body: {} });
+  window.location.href = "index.html";
+}
+
+async function switchToAdmin() {
+  const btn = document.getElementById('btn-switch-admin');
+  btn.disabled = true;
+  btn.textContent = 'Switching...';
+
+  const r = await api('switch_role', { body: { role: 'admin' } });
+  if (r.success) {
+    window.location.href = 'dashboard.html';
+  } else {
+    toast(r.error || 'Failed to switch role.', 'err');
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Switch to Admin View`;
+  }
+}
+</script>
+</body>
+</html>

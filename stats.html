@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<link rel="icon" type="image/jpeg" href="favicon.jpg"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NEU Library — Statistics</title>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+  .preset-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .preset-tab {
+    padding:8px 20px; border-radius:20px; border:1.5px solid #E2E8F0;
+    background:#fff; color:#718096; cursor:pointer; font-size:12px; font-weight:600;
+    letter-spacing:0.05em; transition:all 0.15s;
+  }
+  .preset-tab:hover  { border-color:#FFC107; color:#B37F00; }
+  .preset-tab.active { background:#FFC107; border-color:#FFC107; color:#1A202C; box-shadow:0 2px 8px rgba(255,193,7,0.3); }
+
+  .filter-card {
+    background:#fff; border:1px solid #E2E8F0; border-radius:12px;
+    padding:20px 24px; margin-bottom:24px;
+    box-shadow:0 1px 4px rgba(0,0,0,0.05); border-left:4px solid #FFC107;
+  }
+  .filter-title { font-size:11px; font-weight:700; color:#1B2A5E; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:16px; }
+  .filter-grid  { display:grid; grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:14px; align-items:end; }
+  .filter-grid .field { margin-bottom:0; }
+
+  .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px; }
+  .stat-box {
+    background:#fff; border:1px solid #E2E8F0; border-radius:12px;
+    padding:20px 22px; box-shadow:0 1px 4px rgba(0,0,0,0.05);
+    position:relative; overflow:hidden;
+  }
+  .stat-box::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; }
+  .sb-yellow::before { background:linear-gradient(90deg,#FFC107,#E5A800); }
+  .sb-blue::before   { background:linear-gradient(90deg,#3182CE,#2C5282); }
+  .sb-green::before  { background:linear-gradient(90deg,#38A169,#276749); }
+  .sb-navy::before   { background:linear-gradient(90deg,#1B2A5E,#2d4080); }
+  .sb-teal::before   { background:linear-gradient(90deg,#319795,#234E52); }
+  .sb-orange::before { background:linear-gradient(90deg,#DD6B20,#9C4221); }
+
+  .sb-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+  .sb-label { font-size:11px; color:#718096; letter-spacing:0.1em; text-transform:uppercase; font-weight:600; margin-bottom:4px; }
+  .sb-value { font-size:36px; font-weight:700; font-family:'Playfair Display',serif; line-height:1; }
+  .sb-sub   { font-size:11px; color:#A0AEC0; margin-top:4px; }
+
+  .daily-card {
+    background:#fff; border:1px solid #E2E8F0; border-radius:12px;
+    padding:20px 22px; margin-bottom:24px; box-shadow:0 1px 4px rgba(0,0,0,0.05);
+  }
+  .daily-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .daily-title { font-size:11px; font-weight:700; color:#1B2A5E; letter-spacing:0.12em; text-transform:uppercase; }
+  .range-pill {
+    padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600;
+    background:rgba(255,193,7,0.1); border:1px solid rgba(255,193,7,0.35); color:#B37F00;
+  }
+  .daily-bars { display:flex; align-items:flex-end; gap:5px; height:150px; }
+  .d-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; min-width:0; }
+  .d-bar {
+    width:100%; border-radius:4px 4px 0 0; min-height:4px;
+    background:linear-gradient(to top,#E5A800,#FFC107);
+    cursor:pointer; position:relative; transition:opacity 0.15s;
+  }
+  .d-bar:hover { opacity:0.75; }
+  .d-bar:hover::after {
+    content:attr(data-tip); position:absolute; top:-28px; left:50%; transform:translateX(-50%);
+    background:#1B2A5E; color:#fff; padding:3px 10px; border-radius:6px;
+    font-size:11px; white-space:nowrap; z-index:10; font-weight:600;
+  }
+  .d-date { font-size:9px; color:#A0AEC0; text-align:center; white-space:nowrap; overflow:hidden; width:100%; }
+
+  .charts-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .chart-card {
+    background:#fff; border:1px solid #E2E8F0; border-radius:12px;
+    padding:20px 22px; box-shadow:0 1px 4px rgba(0,0,0,0.05);
+  }
+  .chart-title { font-size:11px; font-weight:700; color:#1B2A5E; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:14px; padding-bottom:10px; border-bottom:2px solid rgba(255,193,7,0.15); }
+
+  .bar-item { margin-bottom:10px; }
+  .bar-item:last-child { margin-bottom:0; }
+  .bar-row  { display:flex; justify-content:space-between; margin-bottom:5px; }
+  .bar-name { font-size:12px; color:#1A202C; font-weight:500; }
+  .bar-cnt  { font-size:12px; font-weight:700; color:#1B2A5E; }
+  .bar-track { height:7px; background:#F0F2F8; border-radius:4px; overflow:hidden; }
+  .bar-fill  { height:100%; border-radius:4px; transition:width 0.6s ease; }
+  .bf-y { background:linear-gradient(90deg,#FFC107,#E5A800); }
+  .bf-b { background:linear-gradient(90deg,#3182CE,#2C5282); }
+  .bf-g { background:linear-gradient(90deg,#38A169,#276749); }
+
+  .no-data { color:#A0AEC0; font-size:13px; text-align:center; padding:24px 0; }
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div class="app-layout">
+  <div id="sidebar-placeholder"></div>
+  <main class="main-content">
+    <div class="page-wrap">
+
+      <h1 class="page-title">Visitor Statistics</h1>
+      <p class="page-sub">Filter and analyze library visitor data by date, reason, college, and visitor type</p>
+
+      <!-- Preset tabs -->
+      <div class="preset-tabs">
+        <button class="preset-tab active" id="tab-today"  onclick="setPreset('today')">📅 Today</button>
+        <button class="preset-tab"        id="tab-week"   onclick="setPreset('week')">📆 This Week</button>
+        <button class="preset-tab"        id="tab-month"  onclick="setPreset('month')">🗓️ This Month</button>
+        <button class="preset-tab"        id="tab-custom" onclick="setPreset('custom')">🔍 Custom Range</button>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-card">
+        <p class="filter-title">🔍 Filter Options</p>
+        <div class="filter-grid">
+          <div class="field">
+            <label>From Date</label>
+            <input class="input" type="date" id="date-from"/>
+          </div>
+          <div class="field">
+            <label>To Date</label>
+            <input class="input" type="date" id="date-to"/>
+          </div>
+          <div class="field">
+            <label>Visit Reason</label>
+            <select class="input" id="filter-reason">
+              <option value="">All Reasons</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>College</label>
+            <select class="input" id="filter-college">
+              <option value="">All Colleges</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Visitor Type</label>
+            <select class="input" id="filter-emptype">
+              <option value="">All Types</option>
+              <option value="Student">Student</option>
+              <option value="Teacher">Teacher / Employee</option>
+              <option value="Staff">Staff</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <button class="btn btn-primary" style="width:100%;" onclick="loadStats()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stats-grid">
+        <div class="stat-box sb-yellow">
+          <div class="sb-icon" style="background:rgba(255,193,7,0.12);">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#B37F00" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <p class="sb-label">Total Visits</p>
+          <h2 class="sb-value" style="color:#B37F00;" id="s-total">—</h2>
+          <p class="sb-sub">in selected range</p>
+        </div>
+        <div class="stat-box sb-blue">
+          <div class="sb-icon" style="background:rgba(49,130,206,0.1);">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3182CE" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <p class="sb-label">Unique Visitors</p>
+          <h2 class="sb-value" style="color:#3182CE;" id="s-unique">—</h2>
+          <p class="sb-sub">distinct individuals</p>
+        </div>
+        <div class="stat-box sb-green">
+          <div class="sb-icon" style="background:rgba(56,161,105,0.1);">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#38A169" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <p class="sb-label">Today's Visits</p>
+          <h2 class="sb-value" style="color:#38A169;" id="s-today">—</h2>
+          <p class="sb-sub">entries today</p>
+        </div>
+        <div class="stat-box sb-navy">
+          <div class="sb-icon" style="background:rgba(27,42,94,0.08);">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1B2A5E" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <p class="sb-label">This Week</p>
+          <h2 class="sb-value" style="color:#1B2A5E;" id="s-week">—</h2>
+          <p class="sb-sub">entries this week</p>
+        </div>
+        <div class="stat-box sb-teal">
+          <div class="sb-icon" style="background:rgba(49,151,149,0.1);">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#319795" stroke-width="2"><path d="M13 4H3v16h10"/><path d="M13 4l8 4v8l-8 4V4z"/><circle cx="17" cy="12" r="1"/></svg>
+          </div>
+          <p class="sb-label">Currently Inside</p>
+          <h2 class="sb-value" style="color:#319795;" id="s-active">—</h2>
+          <p class="sb-sub">right now in library</p>
+        </div>
+        <div class="stat-box sb-orange">
+          <div class="sb-icon" style="background:rgba(221,107,32,0.1);">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#DD6B20" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+          </div>
+          <p class="sb-label">Total Registered</p>
+          <h2 class="sb-value" style="color:#DD6B20;" id="s-students">—</h2>
+          <p class="sb-sub">students in system</p>
+        </div>
+      </div>
+
+      <!-- Daily Trend -->
+      <div class="daily-card">
+        <div class="daily-head">
+          <p class="daily-title">📊 Daily Visit Trend</p>
+          <span class="range-pill" id="range-pill">Loading...</span>
+        </div>
+        <div class="daily-bars" id="daily-bars">
+          <div class="no-data">Loading chart...</div>
+        </div>
+      </div>
+
+      <!-- 3 Breakdown Charts -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <p class="chart-title">🏷️ By Visit Reason</p>
+          <div id="chart-reason"><div class="no-data">No data yet</div></div>
+        </div>
+        <div class="chart-card">
+          <p class="chart-title">🏫 By College</p>
+          <div id="chart-college"><div class="no-data">No data yet</div></div>
+        </div>
+        <div class="chart-card">
+          <p class="chart-title">👤 By Visitor Type</p>
+          <div id="chart-emptype"><div class="no-data">No data yet</div></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script>
+  function todayStr()  { return new Date().toISOString().split('T')[0]; }
+  function mondayStr() {
+    const d = new Date(), day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(new Date().setDate(diff)).toISOString().split('T')[0];
+  }
+  function firstOfMonthStr() {
+    const d = new Date(); d.setDate(1);
+    return d.toISOString().split('T')[0];
+  }
+
+  function setPreset(p) {
+    document.querySelectorAll('.preset-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + p).classList.add('active');
+    const today = todayStr();
+    if (p === 'today')  { document.getElementById('date-from').value = today;             document.getElementById('date-to').value = today; }
+    if (p === 'week')   { document.getElementById('date-from').value = mondayStr();       document.getElementById('date-to').value = today; }
+    if (p === 'month')  { document.getElementById('date-from').value = firstOfMonthStr(); document.getElementById('date-to').value = today; }
+    if (p !== 'custom') loadStats();
+  }
+
+  async function loadStats() {
+    const dateFrom = document.getElementById('date-from').value || todayStr();
+    const dateTo   = document.getElementById('date-to').value   || todayStr();
+    const reason   = document.getElementById('filter-reason').value;
+    const college  = document.getElementById('filter-college').value;
+    const empType  = document.getElementById('filter-emptype').value;
+
+    document.getElementById('range-pill').textContent = dateFrom === dateTo ? dateFrom : `${dateFrom} → ${dateTo}`;
+
+    const r = await api('get_stats', {
+      params: { date_from: dateFrom, date_to: dateTo, visit_reason: reason, college, employee_type: empType }
+    });
+
+    if (!r.success || !r.stats) {
+      toast('Failed to load statistics: ' + (r.error || 'Unknown error'), 'err');
+      return;
+    }
+
+    const s = r.stats;
+
+    // ── Stat cards — use exact field names from PHP compact() ──
+    document.getElementById('s-total').textContent    = s.totalVisits    ?? 0;
+    document.getElementById('s-unique').textContent   = s.uniqueVisitors ?? 0;
+    document.getElementById('s-today').textContent    = s.todayCount     ?? 0;
+    document.getElementById('s-week').textContent     = s.weekCount      ?? 0;
+    document.getElementById('s-active').textContent   = s.activeCount    ?? 0;
+    document.getElementById('s-students').textContent = s.totalStudents  ?? 0;
+
+    // ── Daily chart ──
+    renderDaily(s.daily || []);
+
+    // ── Breakdown bars ──
+    renderBars('chart-reason',  s.byReason  || [], 'visit_reason',  'bf-y');
+    renderBars('chart-college', s.byCollege || [], 'college',       'bf-b');
+    renderBars('chart-emptype', s.byEmpType || [], 'employee_type', 'bf-g');
+  }
+
+  function renderDaily(data) {
+    const el = document.getElementById('daily-bars');
+    if (!data.length) { el.innerHTML = '<div class="no-data">No visits in this range.</div>'; return; }
+    const max = Math.max(...data.map(d => +d.count), 1);
+    el.innerHTML = data.map(d => {
+      // Minimum 15% height so bars are always visible
+      const pct   = Math.max(Math.round((d.count / max) * 100), 15);
+      const label = new Date(d.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return `<div class="d-col">
+        <div style="font-size:10px;color:#1B2A5E;font-weight:700;text-align:center;margin-bottom:3px;">${d.count}</div>
+        <div class="d-bar" style="height:${pct}%;" data-tip="${d.count} visit${d.count!=1?'s':''}"></div>
+        <div class="d-date">${label}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderBars(elId, data, key, colorClass) {
+    const el = document.getElementById(elId);
+    if (!data.length) { el.innerHTML = '<div class="no-data">No data for this filter.</div>'; return; }
+    const max = Math.max(...data.map(d => +d.count), 1);
+    el.innerHTML = data.map(d => {
+      const pct   = Math.round((d.count / max) * 100);
+      const label = d[key] || 'Unknown';
+      return `<div class="bar-item">
+        <div class="bar-row">
+          <span class="bar-name">${esc(label)}</span>
+          <span class="bar-cnt">${d.count}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill ${colorClass}" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  async function loadFilterOptions() {
+    const r = await api('get_filter_options');
+    if (!r.success) return;
+    const rs = document.getElementById('filter-reason');
+    const cs = document.getElementById('filter-college');
+    (r.reasons  || []).forEach(row => { const o = document.createElement('option'); o.value = o.textContent = row.visit_reason; rs.appendChild(o); });
+    (r.colleges || []).forEach(row => { const o = document.createElement('option'); o.value = o.textContent = row.college;       cs.appendChild(o); });
+  }
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    await loadFilterOptions();
+    setPreset('today');
+  });
+</script>
+</body>
+</html>

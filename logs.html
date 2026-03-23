@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<link rel="icon" type="image/jpeg" href="favicon.jpg"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NEU Library — Activity Logs</title>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="toast"></div>
+
+<div class="app-layout">
+  <div id="sidebar-placeholder"></div>
+
+  <main class="main-content">
+    <div class="page-wrap">
+
+      <h1 class="page-title">Activity Logs</h1>
+      <p class="page-sub">Full audit trail of all admin actions and system events</p>
+
+      <div class="card table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Action</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody id="logs-tbody">
+            <tr class="empty-row">
+              <td colspan="3">
+                <div class="loading"><span class="spinner"></span>Loading...</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', async () => {
+  await requireAuth();
+  loadLogs();
+});
+
+async function loadLogs() {
+  const r = await api('get_logs');
+  const logs = r.logs || [];
+  const tbody = document.getElementById('logs-tbody');
+
+  if (!logs.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="3">No activity logs found.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = logs.map((l, i) => `
+    <tr style="background: ${i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)'}">
+      <td class="td-dim" style="white-space:nowrap;">${fmtDate(l.logged_at)}</td>
+      <td><span class="badge badge-gold">${esc(l.action)}</span></td>
+      <td style="color:var(--muted);font-size:13px;">${esc(l.detail)}</td>
+    </tr>`).join('');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<link rel="icon" type="image/jpeg" href="favicon.jpg"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NEU Library — Manage Users</title>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="toast"></div>
+<div class="app-layout">
+  <div id="sidebar-placeholder"></div>
+  <main class="main-content">
+    <div class="page-wrap">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Manage Users</h1>
+          <p class="page-sub" id="users-count" style="margin-bottom:0;">Who can log in to the system</p>
+        </div>
+        <button class="btn btn-primary" onclick="openAddUser()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>Add User
+        </button>
+      </div>
+
+      <!-- Info box -->
+      <div class="alert alert-info" style="margin-bottom:24px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Only emails listed here can log in to the system. Add or remove users to control access.
+      </div>
+
+      <div class="card table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th><th>Email</th><th>Role</th>
+              <th>Status</th><th>Added</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr class="empty-row"><td colspan="6">
+              <div class="loading"><span class="spinner"></span>Loading...</div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Add/Edit User Modal -->
+<div class="modal-overlay" id="modal-user">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="user-modal-title">Add User</h3>
+      <button class="modal-close" onclick="closeModal('modal-user')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="user-form-error" class="alert alert-error" style="display:none;"></div>
+      <div class="field"><label>Full Name</label><input class="input" id="uf-name" placeholder="e.g. Juan dela Cruz"/></div>
+      <div class="field"><label>Email Address</label><input class="input" id="uf-email" type="email" placeholder="e.g. jdelacruz@neu.edu.ph"/></div>
+      <div class="field" id="uf-pass-wrap">
+        <label>Password <span id="uf-pass-hint" style="color:var(--dim);font-weight:400;text-transform:none;letter-spacing:0;">(leave blank to keep existing)</span></label>
+        <input class="input" id="uf-pass" type="password" placeholder="Minimum 6 characters"/>
+      </div>
+      <div class="input-row">
+        <div class="field">
+          <label>Role</label>
+          <select class="input" id="uf-role">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="field" id="uf-status-wrap" style="display:none;">
+          <label>Status</label>
+          <select class="input" id="uf-active">
+            <option value="1">Active</option>
+            <option value="0">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-user')">Cancel</button>
+        <button class="btn btn-primary" id="uf-submit" onclick="submitUserForm()">Add User</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal" style="width:420px;">
+    <div class="modal-head">
+      <h3>Remove User</h3>
+      <button class="modal-close" onclick="closeModal('modal-confirm')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-msg" style="color:#c4cbd8;font-size:14px;margin-bottom:20px;line-height:1.6;"></p>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Cancel</button>
+        <button class="btn btn-danger" id="confirm-ok-btn">Remove</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script>
+let editingUserId = null;
+
+window.addEventListener('DOMContentLoaded', async () => { loadUsers(); });
+
+async function loadUsers() {
+  const r = await api('get_users');
+  const users = r.users || [];
+  document.getElementById('users-count').textContent = `${users.length} authorized users`;
+  const tbody = document.getElementById('users-tbody');
+  if (!users.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No users found.</td></tr>'; return; }
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td class="td-name">${esc(u.name)}</td>
+      <td class="td-muted">${esc(u.email)}</td>
+      <td><span class="badge ${u.role==='admin'?'badge-gold':'badge-blue'}">${u.role}</span></td>
+      <td><span class="badge ${u.is_active?'badge-green':'badge-gray'}">${u.is_active?'Active':'Inactive'}</span></td>
+      <td class="td-dim">${fmtDateShort(u.created_at)}</td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm btn-icon" onclick='openEditUser(${JSON.stringify(JSON.stringify(u))})' title="Edit">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn btn-sm" onclick="toggleBlockUser(${u.id},'${esc(u.name)}',${u.is_active})"
+            style="background:${u.is_active ? 'rgba(229,62,62,0.1)' : 'rgba(56,161,105,0.1)'};color:${u.is_active ? '#E53E3E' : '#38A169'};border:1px solid ${u.is_active ? 'rgba(229,62,62,0.3)' : 'rgba(56,161,105,0.3)'};"
+            title="${u.is_active ? 'Block User' : 'Unblock User'}">
+            ${u.is_active ? 'Block' : 'Unblock'}
+          </button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function openAddUser() {
+  editingUserId = null;
+  document.getElementById('user-modal-title').textContent = 'Add New User';
+  document.getElementById('uf-submit').textContent = 'Add User';
+  document.getElementById('uf-email').disabled = false;
+  document.getElementById('uf-status-wrap').style.display = 'none';
+  document.getElementById('uf-pass-hint').style.display = 'none';
+  ['uf-name','uf-email','uf-pass'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('uf-role').value = 'user';
+  document.getElementById('uf-active').value = '1';
+  hideAlert('user-form-error');
+  openModal('modal-user');
+}
+
+function openEditUser(jsonStr) {
+  const u = JSON.parse(jsonStr);
+  editingUserId = u.id;
+  document.getElementById('user-modal-title').textContent = 'Edit User';
+  document.getElementById('uf-submit').textContent = 'Save Changes';
+  document.getElementById('uf-email').disabled = true;
+  document.getElementById('uf-status-wrap').style.display = 'block';
+  document.getElementById('uf-pass-hint').style.display = 'inline';
+  document.getElementById('uf-name').value   = u.name;
+  document.getElementById('uf-email').value  = u.email;
+  document.getElementById('uf-pass').value   = '';
+  document.getElementById('uf-role').value   = u.role;
+  document.getElementById('uf-active').value = u.is_active;
+  hideAlert('user-form-error');
+  openModal('modal-user');
+}
+
+async function submitUserForm() {
+  const name      = document.getElementById('uf-name').value.trim();
+  const email     = document.getElementById('uf-email').value.trim();
+  const password  = document.getElementById('uf-pass').value.trim();
+  const role      = document.getElementById('uf-role').value;
+  const is_active = parseInt(document.getElementById('uf-active').value);
+
+  if (!name) { showAlert('user-form-error', 'Name is required.'); return; }
+  if (!editingUserId && !email) { showAlert('user-form-error', 'Email is required.'); return; }
+  if (!editingUserId && !password) { showAlert('user-form-error', 'Password is required for new users.'); return; }
+  if (password && password.length < 6) { showAlert('user-form-error', 'Password must be at least 6 characters.'); return; }
+
+  const action = editingUserId ? 'edit_user' : 'add_user';
+  const body   = editingUserId
+    ? { id: editingUserId, name, role, is_active, password }
+    : { email, name, password, role };
+
+  const r = await api(action, { body });
+  if (r.success) {
+    toast(editingUserId ? 'User updated.' : 'User added!');
+    closeModal('modal-user');
+    loadUsers();
+  } else {
+    showAlert('user-form-error', r.error || 'Failed to save user.');
+  }
+}
+
+async function toggleBlockUser(id, name, isActive) {
+  const blocked = isActive ? 1 : 0;
+  const action  = blocked ? 'block' : 'unblock';
+  if (!confirm(`Are you sure you want to ${action} user ${name}?`)) return;
+  const r = await api('block_user', { body: { id, blocked } });
+  if (r.success) {
+    toast(blocked ? 'User blocked.' : 'User unblocked.');
+    loadUsers();
+  } else {
+    toast(r.error || 'Failed.', 'err');
+  }
+}
+</script>
+</body>
+</html>

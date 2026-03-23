@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<link rel="icon" type="image/jpeg" href="favicon.jpg"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NEU Library — Students</title>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="toast"></div>
+
+<div class="app-layout">
+  <div id="sidebar-placeholder"></div>
+
+  <main class="main-content">
+    <div class="page-wrap">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Students</h1>
+          <p class="page-sub" id="students-count" style="margin-bottom:0;">Loading...</p>
+        </div>
+        <button class="btn btn-primary" onclick="openAddStudent()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Student
+        </button>
+      </div>
+
+      <!-- Search -->
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <span class="search-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </span>
+          <input class="input" id="student-search" placeholder="Search by name or ID..."
+                 style="width:300px;" oninput="loadStudents()"/>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Student ID</th><th>Name</th><th>Age</th>
+              <th>Department</th><th>Visits</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="students-tbody">
+            <tr class="empty-row"><td colspan="7">
+              <div class="loading"><span class="spinner"></span>Loading...</div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ── Add/Edit Student Modal ── -->
+<div class="modal-overlay" id="modal-student">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="student-modal-title">Add Student</h3>
+      <button class="modal-close" onclick="closeModal('modal-student')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="student-form-error" class="alert alert-error" style="display:none;"></div>
+      <div class="field">
+        <label>Student ID</label>
+        <input class="input" id="sf-id" placeholder="e.g. STU-2024-001"/>
+      </div>
+      <div class="field">
+        <label>Full Name</label>
+        <input class="input" id="sf-name" placeholder="First and Last Name"/>
+      </div>
+      <div class="input-row">
+        <div class="field">
+          <label>Age</label>
+          <input class="input" id="sf-age" type="number" placeholder="18" min="1" max="120"/>
+        </div>
+        <div class="field">
+          <label>College</label>
+          <select class="input" id="sf-college">
+            <option value="">Select college...</option>
+            <option>College of Accountancy</option>
+            <option>College of Agriculture</option>
+            <option>College of Arts and Science</option>
+            <option>College of Business Administration</option>
+            <option>College of Communication</option>
+            <option>College of Criminology</option>
+            <option>College of Education</option>
+            <option>College of Engineering and Architecture</option>
+            <option>College of Informatics and Computing Studies</option>
+            <option>College of Law</option>
+            <option>College of Medical Technology</option>
+            <option>College of Medicine</option>
+            <option>College of Midwifery</option>
+            <option>College of Music</option>
+            <option>College of Nursing</option>
+            <option>College of Physical Therapy</option>
+            <option>College of Respiratory Therapy</option>
+            <option>School of Graduate Studies</option>
+            <option>School of International Relations</option>
+            <option>Integrated School</option>
+            <option>Alternative Learning System</option>
+            <option>Expanded Tertiary Education Equivalency and Accreditation Program (ETEEAP)</option>
+            <option>Administration / Staff</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-student')">Cancel</button>
+        <button class="btn btn-primary" id="sf-submit" onclick="submitStudentForm()">Register Student</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Confirm Delete Modal ── -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal" style="width:420px;">
+    <div class="modal-head">
+      <h3>Confirm Deletion</h3>
+      <button class="modal-close" onclick="closeModal('modal-confirm')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-msg" style="color:#c4cbd8;font-size:14px;margin-bottom:20px;line-height:1.5;"></p>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Cancel</button>
+        <button class="btn btn-danger" id="confirm-ok-btn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Visit History Modal ── -->
+<div class="modal-overlay" id="modal-history">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="history-title">Visit History</h3>
+      <button class="modal-close" onclick="closeModal('modal-history')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body" id="history-body"></div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script>
+let editingStudentId = null;
+let visitCountMap = {};
+
+window.addEventListener('DOMContentLoaded', async () => {
+  await requireAuth();
+  loadStudents();
+});
+
+async function loadStudents() {
+  const search = document.getElementById('student-search').value;
+  const [r, visitsR] = await Promise.all([
+    api('get_students', { params: { search } }),
+    api('get_visits')
+  ]);
+
+  visitCountMap = {};
+  (visitsR.visits || []).forEach(v => {
+    visitCountMap[v.student_id] = (visitCountMap[v.student_id] || 0) + 1;
+  });
+
+  const students = r.students || [];
+  document.getElementById('students-count').textContent = `${students.length} registered students`;
+
+  const tbody = document.getElementById('students-tbody');
+  if (!students.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No students found.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = students.map(s => `
+    <tr>
+      <td class="td-id">${esc(s.id)}</td>
+      <td class="td-name">${esc(s.name)}</td>
+      <td class="td-muted">${s.age}</td>
+      <td class="td-muted">${esc(s.department)}</td>
+      <td><span class="badge badge-blue">${visitCountMap[s.id] || 0}</span></td>
+      <td class="td-dim">${fmtDateShort(s.created_at)}</td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="viewHistory('${esc(s.id)}','${esc(s.name)}')">
+            History
+          </button>
+          <button class="btn btn-ghost btn-sm btn-icon" onclick='openEditStudent(${JSON.stringify(JSON.stringify(s))})' title="Edit">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          <button class="btn btn-sm" onclick="toggleBlock('${esc(s.id)}','${esc(s.name)}',${s.blocked ? 1 : 0})"
+            style="padding:6px 12px;font-size:11px;background:${s.blocked ? 'rgba(56,161,105,0.1)' : 'rgba(229,62,62,0.1)'};color:${s.blocked ? '#38A169' : '#E53E3E'};border:1.5px solid ${s.blocked ? 'rgba(56,161,105,0.3)' : 'rgba(229,62,62,0.3)'};border-radius:8px;cursor:pointer;font-weight:600;">
+            ${s.blocked ? '✓ Unblock' : '⊘ Block'}
+          </button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+/* ── Add Student ── */
+function openAddStudent() {
+  editingStudentId = null;
+  document.getElementById('student-modal-title').textContent = 'Register New Student';
+  document.getElementById('sf-submit').textContent = 'Register Student';
+  document.getElementById('sf-id').disabled = false;
+  ['sf-id','sf-name','sf-age','sf-college'].forEach(id => document.getElementById(id).value = '');
+  hideAlert('student-form-error');
+  openModal('modal-student');
+}
+
+/* ── Edit Student ── */
+function openEditStudent(jsonStr) {
+  const s = JSON.parse(jsonStr);
+  editingStudentId = s.id;
+  document.getElementById('student-modal-title').textContent = 'Edit Student';
+  document.getElementById('sf-submit').textContent = 'Save Changes';
+  document.getElementById('sf-id').value = s.id;
+  document.getElementById('sf-id').disabled = true;
+  document.getElementById('sf-name').value = s.name;
+  document.getElementById('sf-age').value  = s.age;
+  document.getElementById('sf-college').value = s.college || s.department || '';
+  hideAlert('student-form-error');
+  openModal('modal-student');
+}
+
+/* ── Submit Form ── */
+async function submitStudentForm() {
+  const id         = document.getElementById('sf-id').value.trim().toUpperCase();
+  const name       = document.getElementById('sf-name').value.trim();
+  const age        = parseInt(document.getElementById('sf-age').value);
+  const college = document.getElementById('sf-college').value;
+
+  if (!id || !name || !age || !college) {
+    showAlert('student-form-error', 'All fields are required.');
+    return;
+  }
+  if (isNaN(age) || age < 1 || age > 120) {
+    showAlert('student-form-error', 'Please enter a valid age (1–120).');
+    return;
+  }
+
+  const action = editingStudentId ? 'edit_student' : 'add_student';
+  const r = await api(action, { body: { id, name, age, college, department: college } });
+
+  if (r.success) {
+    toast(editingStudentId ? 'Student updated successfully.' : 'Student registered!');
+    closeModal('modal-student');
+    loadStudents();
+  } else {
+    showAlert('student-form-error', r.error || 'Failed to save student.');
+  }
+}
+
+/* ── Confirm Delete ── */
+async function toggleBlock(id, name, currentlyBlocked) {
+  const blocked = currentlyBlocked ? 0 : 1;
+  const action  = blocked ? 'block' : 'unblock';
+  if (!confirm(`Are you sure you want to ${action} student ${name}?`)) return;
+  const r = await api('block_student', { body: { id, blocked } });
+  if (r.success) {
+    toast(blocked ? 'Student blocked.' : 'Student unblocked.');
+    loadStudents();
+  } else {
+    toast(r.error || 'Failed.', 'err');
+  }
+}
+
+/* ── Visit History ── */
+async function viewHistory(sid, name) {
+  document.getElementById('history-title').textContent = `Visit History — ${name}`;
+  document.getElementById('history-body').innerHTML =
+    '<div class="loading"><span class="spinner"></span>Loading...</div>';
+  openModal('modal-history');
+
+  const r = await api('get_student_visits', { params: { student_id: sid } });
+  const visits = r.visits || [];
+
+  if (!visits.length) {
+    document.getElementById('history-body').innerHTML =
+      '<p style="color:var(--dim);font-size:13px;">No visits recorded for this student.</p>';
+    return;
+  }
+
+  document.getElementById('history-body').innerHTML = visits.map(v => `
+    <div class="visit-item">
+      <div class="visit-item-head">
+        <span style="color:#e2e8f0;font-size:13px;font-weight:600;">${fmtDate(v.entry_time)}</span>
+        <span class="badge ${v.status === 'active' ? 'badge-green' : 'badge-gray'}">
+          ${v.status === 'active' ? 'Inside' : 'Exited'}
+        </span>
+      </div>
+      <p style="margin:0;color:var(--muted);font-size:12px;">Activities: ${esc(v.activities || 'None')}</p>
+      ${v.exit_time
+        ? `<p style="margin:4px 0 0;color:var(--dim);font-size:11px;">Departed: ${fmtDate(v.exit_time)}</p>`
+        : ''}
+    </div>`).join('');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<link rel="icon" type="image/jpeg" href="favicon.jpg"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NEU Library — Dashboard</title>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+  .live-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10px; color: var(--green);
+    letter-spacing: 0.15em; text-transform: uppercase;
+    background: rgba(52,211,153,0.08);
+    border: 1px solid rgba(52,211,153,0.2);
+    padding: 4px 10px; border-radius: 20px;
+    margin-left: 10px; vertical-align: middle;
+  }
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .row-checkin  { border-left: 3px solid var(--green) !important; }
+  .row-checkout { border-left: 3px solid var(--blue)  !important; }
+
+  .inside-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .inside-item:last-child { border-bottom: none; }
+  .inside-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--gold-faint);
+    border: 1px solid rgba(212,175,55,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: var(--gold);
+    flex-shrink: 0; font-family: Georgia, serif;
+    margin-right: 12px;
+  }
+  .inside-name { color: var(--text); font-size: 13px; font-weight: 500; }
+  .inside-dept { color: var(--dim); font-size: 11px; margin-top: 1px; }
+  .inside-time { color: var(--green); font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .refresh-info { font-size: 11px; color: var(--dim); }
+  .card-header-row { display: flex; align-items: center; justify-content: space-between; }
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<div class="app-layout">
+  <div id="sidebar-placeholder"></div>
+
+  <main class="main-content">
+    <div class="page-wrap">
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <h1 class="page-title">
+          Dashboard
+          <span class="live-badge"><span class="live-dot"></span>Live</span>
+        </h1>
+        <a href="libkiosk.html" class="btn btn-primary" target="_blank">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+            <polyline points="10 17 15 12 10 7"/>
+            <line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+          Open Kiosk
+        </a>
+      </div>
+      <p class="page-sub" id="dash-date"></p>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <p class="stat-label">Total Students</p>
+          <h2 class="stat-value" style="color:var(--gold);" id="stat-students">—</h2>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Today's Visits</p>
+          <h2 class="stat-value" style="color:var(--blue);" id="stat-today">—</h2>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Currently Inside</p>
+          <h2 class="stat-value" style="color:var(--green);" id="stat-active">—</h2>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Total Visits</p>
+          <h2 class="stat-value" style="color:var(--red);" id="stat-total">—</h2>
+        </div>
+      </div>
+
+      <!-- Two column -->
+      <div class="dash-grid" style="margin-bottom:20px;">
+
+        <!-- Currently Inside -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-row">
+              <p class="card-title">Currently Inside</p>
+              <span class="refresh-info" id="last-refresh">Auto-refreshes every 15s</span>
+            </div>
+          </div>
+          <div class="card-pad" id="inside-list">
+            <div class="loading"><span class="spinner"></span>Loading...</div>
+          </div>
+        </div>
+
+        <!-- Today compact log -->
+        <div class="card">
+          <div class="card-header">
+            <p class="card-title">Today's Check-In / Check-Out Log</p>
+          </div>
+          <div class="card-pad" id="today-log" style="max-height:280px;overflow-y:auto;">
+            <div class="loading"><span class="spinner"></span>Loading...</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Full today table -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-row">
+            <p class="card-title">Today's Visit Details</p>
+            <span id="today-count" class="badge badge-blue">0 visits</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>Student ID</th>
+                <th>Department</th>
+                <th>Check-In Time</th>
+                <th>Check-Out Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="today-tbody">
+              <tr class="empty-row">
+                <td colspan="6">
+                  <div class="loading"><span class="spinner"></span>Loading...</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', async () => {
+  await requireAuth();
+  document.getElementById('dash-date').textContent =
+    new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  loadAll();
+  setInterval(loadAll, 15000);
+});
+
+async function loadAll() {
+  const [stats, active, today] = await Promise.all([
+    api('get_dashboard_stats'),
+    api('get_active_visits'),
+    api('get_today_visits')
+  ]);
+
+  // Stats
+  if (stats.stats) {
+    document.getElementById('stat-students').textContent = stats.stats.total_students;
+    document.getElementById('stat-today').textContent    = stats.stats.today_visits;
+    document.getElementById('stat-active').textContent   = stats.stats.active_visits;
+    document.getElementById('stat-total').textContent    = stats.stats.total_visits;
+  }
+
+  // Currently Inside
+  const insideEl    = document.getElementById('inside-list');
+  const activeVisits = active.visits || [];
+  if (!activeVisits.length) {
+    insideEl.innerHTML = '<p style="color:var(--dim);font-size:13px;text-align:center;padding:10px 0;">No students currently inside.</p>';
+  } else {
+    insideEl.innerHTML = activeVisits.map(v => `
+      <div class="inside-item">
+        <div style="display:flex;align-items:center;">
+          <div class="inside-avatar">${esc(v.student_name.charAt(0))}</div>
+          <div>
+            <div class="inside-name">${esc(v.student_name)}</div>
+            <div class="inside-dept">${esc(v.student_id)} · ${esc(v.department)}</div>
+          </div>
+        </div>
+        <div class="inside-time">
+          In at ${new Date(v.entry_time).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}
+        </div>
+      </div>`).join('');
+  }
+
+  // Today compact log
+  const todayVisits = today.visits || [];
+  const logEl = document.getElementById('today-log');
+  if (!todayVisits.length) {
+    logEl.innerHTML = '<p style="color:var(--dim);font-size:13px;">No visits today yet.</p>';
+  } else {
+    logEl.innerHTML = todayVisits.map(v => `
+      <div style="display:flex;justify-content:space-between;align-items:center;
+                  padding:9px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <p style="margin:0;font-size:13px;color:var(--text);">${esc(v.student_name)}</p>
+          <p style="margin:2px 0 0;font-size:11px;color:var(--dim);">${esc(v.student_id)}</p>
+        </div>
+        <div style="text-align:right;">
+          <span class="badge ${v.status==='active'?'badge-green':'badge-gray'}">
+            ${v.status==='active'?'Inside':'Left'}
+          </span>
+          <p style="margin:3px 0 0;font-size:11px;color:var(--dim);">
+            ${new Date(v.entry_time).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}
+            ${v.exit_time ? `→ ${new Date(v.exit_time).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}` : ''}
+          </p>
+        </div>
+      </div>`).join('');
+  }
+
+  // Today full table
+  document.getElementById('today-count').textContent = `${todayVisits.length} visit${todayVisits.length!==1?'s':''}`;
+  const tbody = document.getElementById('today-tbody');
+  if (!todayVisits.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No visits recorded today.</td></tr>';
+  } else {
+    tbody.innerHTML = todayVisits.map(v => `
+      <tr class="${v.status==='active'?'row-checkin':'row-checkout'}">
+        <td class="td-name">${esc(v.student_name)}</td>
+        <td class="td-id">${esc(v.student_id)}</td>
+        <td class="td-muted">${esc(v.department)}</td>
+        <td style="color:var(--green);font-size:13px;font-weight:600;">
+          ${new Date(v.entry_time).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+        </td>
+        <td style="color:var(--blue);font-size:13px;font-weight:600;">
+          ${v.exit_time ? new Date(v.exit_time).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '—'}
+        </td>
+        <td>
+          <span class="badge ${v.status==='active'?'badge-green':'badge-gray'}">
+            ${v.status==='active'?'Inside':'Exited'}
+          </span>
+        </td>
+      </tr>`).join('');
+  }
+
+  document.getElementById('last-refresh').textContent =
+    `Updated: ${new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit', timeZone:'Asia/Manila'})}`; 
+}
+</script>
+</body>
+</html>
